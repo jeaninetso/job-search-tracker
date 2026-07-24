@@ -3,6 +3,9 @@ export type GoalKind = 'count' | 'boolean';
 export interface Profile {
   id: string;
   display_name: string;
+  avatar_key: string | null;
+  bio: string | null;
+  status: string | null;
   created_at: string;
 }
 

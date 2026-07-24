@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
 import { computeStreak } from '../lib/streak';
+import { Avatar } from '../components/Avatar';
 import type { DailyProgress, GoalItem } from '../types';
 
 const todayKey = () => formatISO(new Date(), { representation: 'date' });
@@ -129,7 +130,10 @@ export function Dashboard() {
   if (items.length === 0) {
     return (
       <div className="page">
-        <h1>Hey {profile?.display_name}</h1>
+        <div className="greeting-row">
+          <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} />
+          <h1>Hey {profile?.display_name}</h1>
+        </div>
         <p>You haven't set up a daily checklist yet. Head to "My Goals" to add one.</p>
       </div>
     );
@@ -137,7 +141,10 @@ export function Dashboard() {
 
   return (
     <div className="page">
-      <h1>Today</h1>
+      <div className="greeting-row">
+        <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} />
+        <h1>Today</h1>
+      </div>
       <p className="streak">🔥 {streak} day streak</p>
       <p className={dayComplete ? 'day-status day-status--complete' : 'day-status'}>
         {dayComplete ? "You're done for today!" : 'Keep going.'}

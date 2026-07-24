@@ -3,6 +3,8 @@ import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
 import { computeStreak } from '../lib/streak';
+import { Avatar } from '../components/Avatar';
+import { getStatusLabel } from '../lib/presets';
 import type { DailyProgress, GoalItem, Profile } from '../types';
 
 const todayKey = () => formatISO(new Date(), { representation: 'date' });
@@ -74,7 +76,15 @@ export function Feed() {
       <div className="feed-list">
         {sorted.map(({ profile, streak, dayComplete, hasGoals }) => (
           <div className="feed-card" key={profile.id}>
-            <span className="feed-name">{profile.display_name}</span>
+            <div className="feed-identity">
+              <Avatar name={profile.display_name} avatarKey={profile.avatar_key} />
+              <div className="feed-name-block">
+                <span className="feed-name">{profile.display_name}</span>
+                {getStatusLabel(profile.status) && (
+                  <span className="feed-status">{getStatusLabel(profile.status)}</span>
+                )}
+              </div>
+            </div>
             {hasGoals ? (
               <>
                 <span className="feed-streak">🔥 {streak}</span>

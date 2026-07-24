@@ -6,6 +6,9 @@
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   display_name text not null,
+  avatar_key text,
+  bio text check (bio is null or char_length(bio) <= 280),
+  status text,
   created_at timestamptz not null default now()
 );
 

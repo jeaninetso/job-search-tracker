@@ -6,6 +6,7 @@ import { ProfileSetup } from './pages/ProfileSetup';
 import { GoalSetup } from './pages/GoalSetup';
 import { Dashboard } from './pages/Dashboard';
 import { Feed } from './pages/Feed';
+import { Profile } from './pages/Profile';
 import './App.css';
 
 function Gate({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ function Nav() {
       <Link to="/">Today</Link>
       <Link to="/goals">My Goals</Link>
       <Link to="/feed">The Group</Link>
+      <Link to="/profile">My Profile</Link>
       <button className="link-button" onClick={() => supabase.auth.signOut()}>
         Sign out
       </button>
@@ -58,6 +60,14 @@ function AppRoutes() {
         element={
           <Gate>
             <Feed />
+          </Gate>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <Gate>
+            <Profile />
           </Gate>
         }
       />
