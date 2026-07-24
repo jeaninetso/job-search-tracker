@@ -1,5 +1,6 @@
 :root {
-  --bg: #f0efeb; /* warm neutral canvas */
+  --bg-start: #fff1e6; /* cream */
+  --bg-end: #fde2e4; /* blush pink - adjacent to cream in the palette strip */
   --card: #eae4e9; /* light lavender-gray */
   --field: #ffffff; /* inputs, recessed above card */
   --text: #33303a; /* dark neutral - not from the swatch, added for legibility on a light theme */
@@ -9,7 +10,8 @@
   --good: #bee1e6; /* teal, success/done states */
   --danger: #e37b87; /* added - none of the pastels read as "error" strongly enough */
   --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  --font-heading: 'DotGothic16', monospace;
+  --font-title: 'Bitcount Single', monospace;
+  --font-subtitle: 'Space Mono', monospace;
   font-family: var(--font-body);
   color-scheme: light;
 }
@@ -20,13 +22,20 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-start), var(--bg-end)) fixed;
   color: var(--text);
 }
 
 h1 {
-  font-family: var(--font-heading);
+  font-family: var(--font-title);
+  font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-family: var(--font-subtitle);
+  color: var(--muted);
 }
 
 .nav {
@@ -41,7 +50,7 @@ h1 {
   color: var(--text);
   text-decoration: none;
   font-weight: 700;
-  font-family: var(--font-heading);
+  font-family: var(--font-subtitle);
 }
 
 .page {
@@ -112,6 +121,7 @@ button:disabled {
 .hint {
   color: var(--muted);
   font-size: 0.9rem;
+  font-family: var(--font-subtitle);
 }
 
 .error {
@@ -121,7 +131,7 @@ button:disabled {
 .streak {
   font-size: 1.5rem;
   font-weight: 700;
-  font-family: var(--font-heading);
+  font-family: var(--font-title);
 }
 
 .streak--active {
@@ -248,7 +258,7 @@ button:disabled {
 
 .goal-form h3 {
   width: 100%;
-  font-family: var(--font-heading);
+  font-family: var(--font-subtitle);
 }
 
 .feed-list {
@@ -277,7 +287,7 @@ button:disabled {
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   background: var(--field);
-  font-family: var(--font-heading);
+  font-family: var(--font-subtitle);
 }
 
 .feed-badge--done {
@@ -288,9 +298,16 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  font-weight: 700;
+  border-radius: 22%;
+  object-fit: cover;
   flex-shrink: 0;
+}
+
+.avatar--fallback {
+  background: var(--card);
+  color: var(--text);
+  font-weight: 700;
+  font-family: var(--font-subtitle);
 }
 
 .feed-identity {
@@ -364,6 +381,7 @@ button:disabled {
   display: block;
   font-weight: 600;
   margin: 1rem 0 0.25rem;
+  font-family: var(--font-subtitle);
 }
 
 .confetti-container {

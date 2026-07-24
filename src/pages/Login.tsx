@@ -35,7 +35,7 @@ export function Login() {
   return (
     <div className="auth-card">
       <h1>Job Search Tracker</h1>
-      <p>Enter your email for a magic sign-in link.</p>
+      <p className="subtitle">Enter your email for a magic sign-in link.</p>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
