@@ -48,3 +48,11 @@ export function computeStreak(
 
   return streak;
 }
+
+/** More flames at longer streaks - a small visual reward for consistency. */
+export function getStreakFlames(streak: number): string {
+  if (streak >= 30) return '🔥🔥🔥';
+  if (streak >= 7) return '🔥🔥';
+  if (streak >= 1) return '🔥';
+  return '💤';
+}

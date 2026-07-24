@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
-import { computeStreak } from '../lib/streak';
+import { computeStreak, getStreakFlames } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
 import { getStatusLabel } from '../lib/presets';
 import type { DailyProgress, GoalItem, Profile } from '../types';
@@ -87,7 +87,7 @@ export function Feed() {
             </div>
             {hasGoals ? (
               <>
-                <span className="feed-streak">🔥 {streak}</span>
+                <span className="feed-streak">{getStreakFlames(streak)} {streak}</span>
                 <span className={dayComplete ? 'feed-badge feed-badge--done' : 'feed-badge'}>
                   {dayComplete ? 'Done today' : 'In progress'}
                 </span>

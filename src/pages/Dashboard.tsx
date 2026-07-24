@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
-import { computeStreak } from '../lib/streak';
+import { computeStreak, getStreakFlames } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
+import { Confetti } from '../components/Confetti';
 import type { DailyProgress, GoalItem } from '../types';
 
 const todayKey = () => formatISO(new Date(), { representation: 'date' });
@@ -17,6 +18,8 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [savingItemIds, setSavingItemIds] = useState<Set<string>>(new Set());
   const [loadedForDate, setLoadedForDate] = useState(todayKey());
+  const [celebrating, setCelebrating] = useState(false);
+  const wasCompleteRef = useRef<boolean | null>(null);
 
   const load = async () => {
     if (!session) return;
@@ -75,6 +78,17 @@ export function Dashboard() {
   const groups = useMemo(() => evaluateGroups(items, progressByItemId), [items, progressByItemId]);
   const dayComplete = isDayComplete(groups);
   const streak = useMemo(() => computeStreak(items, history, new Date()), [items, history]);
+
+  // Fire confetti only on the moment completion flips true, not on every
+  // render/mount where it was already complete from an earlier session.
+  useEffect(() => {
+    if (wasCompleteRef.current === false && dayComplete) {
+      setCelebrating(true);
+      const timeout = setTimeout(() => setCelebrating(false), 2200);
+      return () => clearTimeout(timeout);
+    }
+    wasCompleteRef.current = dayComplete;
+  }, [dayComplete]);
 
   const upsertProgress = async (item: GoalItem, next: Partial<DailyProgress>) => {
     if (!session || savingItemIds.has(item.id)) return;
@@ -141,13 +155,16 @@ export function Dashboard() {
 
   return (
     <div className="page">
+      {celebrating && <Confetti />}
       <div className="greeting-row">
         <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} />
         <h1>Today</h1>
       </div>
-      <p className="streak">🔥 {streak} day streak</p>
-      <p className={dayComplete ? 'day-status day-status--complete' : 'day-status'}>
-        {dayComplete ? "You're done for today!" : 'Keep going.'}
+      <p className={streak > 0 ? 'streak streak--active' : 'streak'}>
+        {getStreakFlames(streak)} {streak} day streak
+      </p>
+      <p className={dayComplete ? 'day-status day-status--complete celebration-banner' : 'day-status'}>
+        {dayComplete ? "You're done for today! 🎉" : 'Keep going.'}
       </p>
       {error && <p className="error">{error}</p>}
 
@@ -159,13 +176,16 @@ export function Dashboard() {
             return (
               <div className="goal-item" key={item.id}>
                 {item.kind === 'boolean' ? (
-                  <label>
+                  <label className="check-label">
                     <input
                       type="checkbox"
                       checked={progress?.current_done ?? false}
                       disabled={saving}
                       onChange={() => toggleBoolean(item)}
                     />
+                    <span className={progress?.current_done ? 'check-box check-box--checked' : 'check-box'}>
+                      {progress?.current_done ? '✓' : ''}
+                    </span>
                     {item.label}
                   </label>
                 ) : (
@@ -179,6 +199,18 @@ export function Dashboard() {
                     <button disabled={saving} onClick={() => incrementCount(item, -1)}>
                       -1
                     </button>
+                    <div className="progress-bar">
+                      <div
+                        className={
+                          (progress?.current_value ?? 0) >= (item.target ?? Infinity)
+                            ? 'progress-bar-fill progress-bar-fill--done'
+                            : 'progress-bar-fill'
+                        }
+                        style={{
+                          width: `${Math.min(100, ((progress?.current_value ?? 0) / (item.target ?? 1)) * 100)}%`,
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
