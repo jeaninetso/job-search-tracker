@@ -1,4 +1,7 @@
-const COLORS = ['#c9cba3', '#ffe1a8', '#e26d5c', '#f2b8ab', '#ead9a0'];
+// Deeper siblings of the pastel palette - the palette itself is too light
+// to read against the light background, so these are saturated up a bit
+// just for confetti visibility.
+const COLORS = ['#f7b6c2', '#ffd59e', '#a8d8de', '#b8c6f5', '#c9c2d6'];
 const PIECES = 28;
 
 export function Confetti() {

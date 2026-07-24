@@ -1,15 +1,17 @@
 :root {
-  --bg: #472d30; /* Mauve Shadow */
-  --card: #723d46; /* Wine Plum */
-  --field: #341f22; /* darker than bg, for recessed inputs */
-  --text: #ffe1a8; /* Soft Peach */
-  --muted: #c9cba3; /* Dry Sage */
-  --accent: #e26d5c; /* Vibrant Coral */
-  --accent-contrast: #2f1b1e; /* dark text on coral buttons */
-  --good: #c9cba3; /* Dry Sage, doubles as success/done accent */
-  --danger: #d6584a;
-  font-family: system-ui, -apple-system, sans-serif;
-  color-scheme: dark;
+  --bg: #f0efeb; /* warm neutral canvas */
+  --card: #eae4e9; /* light lavender-gray */
+  --field: #ffffff; /* inputs, recessed above card */
+  --text: #33303a; /* dark neutral - not from the swatch, added for legibility on a light theme */
+  --muted: #8b8594; /* derived from --text, for secondary/hint text */
+  --accent: #fad2e1; /* deeper pink, primary buttons/CTA */
+  --accent-contrast: var(--text); /* dark text reads cleanly on the pastel accent */
+  --good: #bee1e6; /* teal, success/done states */
+  --danger: #e37b87; /* added - none of the pastels read as "error" strongly enough */
+  --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-heading: 'DotGothic16', monospace;
+  font-family: var(--font-body);
+  color-scheme: light;
 }
 
 * {
@@ -20,6 +22,11 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+}
+
+h1 {
+  font-family: var(--font-heading);
+  letter-spacing: 0.02em;
 }
 
 .nav {
@@ -33,7 +40,8 @@ body {
 .nav a {
   color: var(--text);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: var(--font-heading);
 }
 
 .page {
@@ -63,6 +71,7 @@ select,
 textarea,
 button {
   font-size: 1rem;
+  font-family: var(--font-body);
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
   border: 1px solid var(--card);
@@ -75,12 +84,12 @@ button {
   background: var(--accent);
   border: none;
   color: var(--accent-contrast);
-  font-weight: 600;
+  font-weight: 700;
   transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 button:not(:disabled):hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(51, 48, 58, 0.18);
 }
 
 button:not(:disabled):active {
@@ -112,6 +121,7 @@ button:disabled {
 .streak {
   font-size: 1.5rem;
   font-weight: 700;
+  font-family: var(--font-heading);
 }
 
 .streak--active {
@@ -135,7 +145,7 @@ button:disabled {
 }
 
 .day-status--complete {
-  color: var(--good);
+  color: #4f8a94; /* darkened --good for readable text weight, not just a border/fill tint */
   font-weight: 600;
 }
 
@@ -150,7 +160,7 @@ button:disabled {
 
 .goal-group:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 16px rgba(51, 48, 58, 0.12);
 }
 
 .goal-group--done {
@@ -238,6 +248,7 @@ button:disabled {
 
 .goal-form h3 {
   width: 100%;
+  font-family: var(--font-heading);
 }
 
 .feed-list {
@@ -266,10 +277,11 @@ button:disabled {
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   background: var(--field);
+  font-family: var(--font-heading);
 }
 
 .feed-badge--done {
-  color: var(--good);
+  color: #4f8a94;
 }
 
 .avatar {

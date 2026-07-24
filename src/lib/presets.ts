@@ -5,14 +5,20 @@ export interface AvatarPreset {
   fg: string;
 }
 
-// Straight from the app's color palette - light backgrounds get dark
-// initials, dark backgrounds get light initials, for contrast.
+// All swatches are light pastels, so every preset uses the same dark text
+// color for contrast (no per-swatch fg needed, unlike the old dark theme).
+// TODO: swap these for Jeanine's 8-bit pixel avatars once she has them.
+const FG = '#33303a';
 export const AVATAR_PRESETS: AvatarPreset[] = [
-  { key: 'sage', label: 'Dry Sage', bg: '#c9cba3', fg: '#2f1b1e' },
-  { key: 'peach', label: 'Soft Peach', bg: '#ffe1a8', fg: '#2f1b1e' },
-  { key: 'coral', label: 'Vibrant Coral', bg: '#e26d5c', fg: '#2f1b1e' },
-  { key: 'plum', label: 'Wine Plum', bg: '#723d46', fg: '#ffe1a8' },
-  { key: 'shadow', label: 'Mauve Shadow', bg: '#472d30', fg: '#ffe1a8' },
+  { key: 'lavender-gray', label: 'Lavender Gray', bg: '#eae4e9', fg: FG },
+  { key: 'cream', label: 'Cream', bg: '#fff1e6', fg: FG },
+  { key: 'blush', label: 'Blush', bg: '#fde2e4', fg: FG },
+  { key: 'rose', label: 'Rose', bg: '#fad2e1', fg: FG },
+  { key: 'sage-mint', label: 'Sage Mint', bg: '#e2ece9', fg: FG },
+  { key: 'teal', label: 'Teal', bg: '#bee1e6', fg: FG },
+  { key: 'warm-gray', label: 'Warm Gray', bg: '#f0efeb', fg: FG },
+  { key: 'periwinkle', label: 'Periwinkle', bg: '#dfe7fd', fg: FG },
+  { key: 'blue-lavender', label: 'Blue Lavender', bg: '#cddafd', fg: FG },
 ];
 
 export const DEFAULT_AVATAR_KEY = AVATAR_PRESETS[0].key;
