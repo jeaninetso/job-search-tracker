@@ -1,10 +1,13 @@
 :root {
-  --bg: #0f1115;
-  --card: #1a1d24;
-  --text: #f2f3f5;
-  --muted: #9aa0ab;
-  --accent: #4f9dff;
-  --good: #3ecf8e;
+  --bg: #472d30; /* Mauve Shadow */
+  --card: #723d46; /* Wine Plum */
+  --field: #341f22; /* darker than bg, for recessed inputs */
+  --text: #ffe1a8; /* Soft Peach */
+  --muted: #c9cba3; /* Dry Sage */
+  --accent: #e26d5c; /* Vibrant Coral */
+  --accent-contrast: #2f1b1e; /* dark text on coral buttons */
+  --good: #c9cba3; /* Dry Sage, doubles as success/done accent */
+  --danger: #d6584a;
   font-family: system-ui, -apple-system, sans-serif;
   color-scheme: dark;
 }
@@ -24,7 +27,7 @@ body {
   gap: 1.5rem;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #2a2d35;
+  border-bottom: 1px solid var(--card);
 }
 
 .nav a {
@@ -61,8 +64,8 @@ button {
   font-size: 1rem;
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
-  border: 1px solid #2a2d35;
-  background: #12141a;
+  border: 1px solid var(--card);
+  background: var(--field);
   color: var(--text);
 }
 
@@ -70,7 +73,7 @@ button {
   cursor: pointer;
   background: var(--accent);
   border: none;
-  color: #fff;
+  color: var(--accent-contrast);
   font-weight: 600;
 }
 
@@ -81,9 +84,10 @@ button:disabled {
 
 .link-button {
   background: none;
-  color: var(--accent);
+  color: var(--text);
   padding: 0;
   font-weight: 500;
+  text-decoration: underline;
 }
 
 .hint {
@@ -92,7 +96,7 @@ button:disabled {
 }
 
 .error {
-  color: #ff6b6b;
+  color: var(--danger);
 }
 
 .streak {
@@ -115,6 +119,7 @@ button:disabled {
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
+  border: 1px solid transparent;
 }
 
 .goal-group--done {
@@ -178,7 +183,7 @@ button:disabled {
   font-size: 0.85rem;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: #12141a;
+  background: var(--field);
 }
 
 .feed-badge--done {
