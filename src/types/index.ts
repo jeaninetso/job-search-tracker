@@ -17,6 +17,8 @@ export interface GoalItem {
   kind: GoalKind;
   target: number | null;
   sort_order: number;
+  /** 0=Sunday..6=Saturday (matches JS Date.getDay()). null means every day. */
+  day_of_week: number | null;
   archived_at: string | null;
   created_at: string;
 }

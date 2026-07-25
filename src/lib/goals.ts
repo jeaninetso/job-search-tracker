@@ -1,5 +1,5 @@
 import type { DailyProgress, GoalGroupStatus, GoalItem } from '../types';
-import { dateKey, todayKey } from './date';
+import { dateKey, todayKey, weekdayOf } from './date';
 
 /**
  * Was this item part of the checklist on the given day? Based on the
@@ -7,10 +7,12 @@ import { dateKey, todayKey } from './date';
  * archiving a goal today doesn't retroactively change whether past days
  * met their requirements. Archiving takes effect the day it happens
  * (a day is still evaluated with the item if archived later that same day).
+ * Also checks day_of_week - a Monday-only item doesn't count on any other day.
  */
 export function isItemActiveOn(item: GoalItem, dayKey: string): boolean {
   if (dateKey(item.created_at) > dayKey) return false;
   if (item.archived_at && dateKey(item.archived_at) <= dayKey) return false;
+  if (item.day_of_week !== null && item.day_of_week !== weekdayOf(dayKey)) return false;
   return true;
 }
 

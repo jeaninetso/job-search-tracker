@@ -42,6 +42,8 @@ create table public.goal_items (
   kind text not null check (kind in ('count', 'boolean')),
   target int check (kind != 'count' or target > 0),
   sort_order int not null default 0,
+  -- 0=Sunday..6=Saturday (matches JS Date.getDay()). NULL means every day.
+  day_of_week smallint check (day_of_week is null or day_of_week between 0 and 6),
   archived_at timestamptz,
   created_at timestamptz not null default now()
 );
