@@ -75,7 +75,7 @@ export function GoalSetup() {
       {groups.map((group) => (
         <div className="goal-group" key={group[0].group_id}>
           {group.map((item) => (
-            <div className="goal-item" key={item.id}>
+            <div className="goal-item goal-item-row" key={item.id}>
               <span>
                 {item.label}
                 {item.kind === 'count' ? ` (target: ${item.target})` : ' (yes/no)'}

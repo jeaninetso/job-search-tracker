@@ -10,7 +10,7 @@
   --accent-contrast: var(--text); /* dark text reads cleanly on the pastel accent */
   --good: #bee1e6; /* teal, success/done states */
   --danger: #e37b87; /* added - none of the pastels read as "error" strongly enough */
-  --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-title: 'Bitcount Single', monospace;
   --font-subtitle: 'Space Mono', monospace;
   font-family: var(--font-body);
@@ -180,6 +180,9 @@ button:disabled {
 
 .goal-item {
   padding: 0.4rem 0;
+}
+
+.goal-item-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
