@@ -1,20 +1,20 @@
 :root {
-  --bg-start: #e2ece9; /* sage mint */
-  --bg-mid: #bee1e6; /* teal */
-  --bg-end: #dfe7fd; /* periwinkle - 3 hue-adjacent turquoise-family stops */
-  --card: #eae4e9; /* light lavender-gray */
-  --field: #ffffff; /* inputs, recessed above card */
-  --text: #33303a; /* dark neutral - not from the swatch, added for legibility on a light theme */
-  --muted: #8b8594; /* derived from --text, for secondary/hint text */
-  --accent: #fad2e1; /* deeper pink, primary buttons/CTA */
-  --accent-contrast: var(--text); /* dark text reads cleanly on the pastel accent */
+  --bg-start: #223028; /* dark sage */
+  --bg-mid: #1d2e32; /* dark teal */
+  --bg-end: #202544; /* dark periwinkle-navy - same hue journey as before, just dark */
+  --card: #363242; /* elevated dark surface */
+  --field: #2b2836; /* inputs + card-style surfaces (goal/feed cards, badges) */
+  --text: #f0efeb; /* light - reusing the "warm gray" pastel as dark-mode text */
+  --muted: #a39cae; /* muted light lavender-gray, for secondary/hint text */
+  --accent: #fad2e1; /* rose - unchanged, still pops against a dark bg */
+  --accent-contrast: #2a2733; /* fixed dark, independent of --text (which is now light) */
   --good: #bee1e6; /* teal, success/done states */
-  --danger: #e37b87; /* added - none of the pastels read as "error" strongly enough */
+  --danger: #f28b96; /* brightened from the light-mode value for dark-bg contrast */
   --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-title: 'Bitcount Single', monospace;
   --font-subtitle: 'Space Mono', monospace;
   font-family: var(--font-body);
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 * {
@@ -81,7 +81,7 @@ h1 {
 }
 
 .nav-links a:hover {
-  color: #4f8a94;
+  color: var(--good);
   transform: translateY(-1px);
 }
 
@@ -205,7 +205,7 @@ button:disabled {
 }
 
 .day-status--complete {
-  color: #4f8a94; /* darkened --good for readable text weight, not just a border/fill tint */
+  color: var(--good);
   font-weight: 600;
 }
 
@@ -349,7 +349,7 @@ button:disabled {
 }
 
 .feed-badge--done {
-  color: #4f8a94;
+  color: var(--good);
 }
 
 .avatar {
