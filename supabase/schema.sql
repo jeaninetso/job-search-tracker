@@ -30,7 +30,12 @@ create policy "users can update their own profile"
   using (auth.uid() = id);
 
 -- Goal items ---------------------------------------------------------------
--- Each row is one checklist item a user has defined for themselves.
+-- Each row is one checklist item for one specific calendar date (for_date).
+-- Every day is fully independent - editing/deleting a goal only ever
+-- affects that date's row. A new day with nothing set up yet gets
+-- auto-copied forward from the user's most recent day that has items
+-- (see src/lib/carryForward.ts) rather than starting from a shared
+-- recurring template.
 -- Items sharing the same group_id are an OR condition: the group counts as
 -- "done" for the day if ANY item in the group is satisfied. A goal with no
 -- OR partner is simply the sole member of its own group.
@@ -42,9 +47,7 @@ create table public.goal_items (
   kind text not null check (kind in ('count', 'boolean')),
   target int check (kind != 'count' or target > 0),
   sort_order int not null default 0,
-  -- 0=Sunday..6=Saturday (matches JS Date.getDay()). NULL means every day.
-  day_of_week smallint check (day_of_week is null or day_of_week between 0 and 6),
-  archived_at timestamptz,
+  for_date date not null default current_date,
   created_at timestamptz not null default now()
 );
 

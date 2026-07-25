@@ -7,6 +7,7 @@ import { computeStreak, getStreakFlames } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
 import { todayKey } from '../lib/date';
+import { ensureTodayGoals } from '../lib/carryForward';
 import type { DailyProgress, GoalItem } from '../types';
 
 export function Dashboard() {
@@ -22,15 +23,20 @@ export function Dashboard() {
 
   const load = async () => {
     if (!session) return;
+    // Copies forward the most recent prior day's checklist if today has
+    // nothing set up yet - must happen before fetching goal_items below.
+    await ensureTodayGoals(session.user.id);
+
     const sixtyDaysAgo = formatISO(new Date(Date.now() - 60 * 86400000), { representation: 'date' });
     const [{ data: goalData }, { data: historyData }] = await Promise.all([
-      // Includes archived items - historical days are evaluated against
-      // whatever was active on that specific day, not the current
-      // checklist, so archiving a goal doesn't rewrite past completions.
+      // Spans many dates - each item's for_date scopes it to one day, so
+      // streak computation can evaluate each past day against whatever
+      // checklist actually existed for it.
       supabase
         .from('goal_items')
         .select('*')
         .eq('user_id', session.user.id)
+        .gte('for_date', sixtyDaysAgo)
         .order('sort_order', { ascending: true }),
       // 60 days back is enough runway for any realistic streak while keeping the query light.
       supabase
@@ -65,6 +71,8 @@ export function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadedForDate]);
 
+  const todayItems = useMemo(() => items.filter((item) => item.for_date === todayKey()), [items]);
+
   const todayProgress = useMemo(
     () => history.filter((row) => row.entry_date === todayKey()),
     [history]
@@ -76,7 +84,7 @@ export function Dashboard() {
     return map;
   }, [todayProgress]);
 
-  const groups = useMemo(() => evaluateGroups(items, progressByItemId), [items, progressByItemId]);
+  const groups = useMemo(() => evaluateGroups(todayItems, progressByItemId), [todayItems, progressByItemId]);
   const dayComplete = isDayComplete(groups);
   const streak = useMemo(() => computeStreak(items, history, new Date()), [items, history]);
 

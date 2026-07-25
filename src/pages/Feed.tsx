@@ -22,11 +22,12 @@ export function Feed() {
   useEffect(() => {
     const load = async () => {
       const sixtyDaysAgo = formatISO(new Date(Date.now() - 60 * 86400000), { representation: 'date' });
-      // Includes archived goal items - see Dashboard.tsx's load() for why:
-      // history is evaluated per-day against what was active THAT day.
+      // Spans many dates per user - each item's for_date scopes it to one
+      // day, which is what lets computeStreak evaluate each past day
+      // against whatever checklist actually existed for it.
       const [{ data: profiles }, { data: allItems }, { data: allProgress }] = await Promise.all([
         supabase.from('profiles').select('*'),
-        supabase.from('goal_items').select('*'),
+        supabase.from('goal_items').select('*').gte('for_date', sixtyDaysAgo),
         supabase.from('daily_progress').select('*').gte('entry_date', sixtyDaysAgo),
       ]);
 
@@ -46,10 +47,11 @@ export function Feed() {
 
       const statuses: MemberStatus[] = (profiles ?? []).map((profile) => {
         const items = itemsByUser.get(profile.id) ?? [];
+        const todayItems = items.filter((item) => item.for_date === todayKey());
         const history = progressByUser.get(profile.id) ?? [];
         const todayProgress = history.filter((row) => row.entry_date === todayKey());
         const progressByItemId = new Map(todayProgress.map((row) => [row.goal_item_id, row]));
-        const groups = evaluateGroups(items, progressByItemId);
+        const groups = evaluateGroups(todayItems, progressByItemId);
         return {
           profile,
           streak: computeStreak(items, history, new Date()),

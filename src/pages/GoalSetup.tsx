@@ -1,34 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
-import { todayKey, weekdayOf, WEEKDAY_LABELS } from '../lib/date';
+import { groupGoalItems } from '../lib/goals';
+import { todayKey } from '../lib/date';
+import { ensureTodayGoals } from '../lib/carryForward';
 import type { GoalItem, GoalKind } from '../types';
-
-const DAY_TABS: { label: string; value: number | null }[] = [
-  { label: 'Every day', value: null },
-  ...WEEKDAY_LABELS.map((label, value) => ({ label, value })),
-];
-
-/** Groups an already day-filtered, non-archived item list by group_id for
- * display - deliberately not the history-aware groupGoalItems from
- * lib/goals.ts, which filters by day_of_week against a specific evaluated
- * date rather than "which tab am I editing." */
-function groupByGroupId(items: GoalItem[]): GoalItem[][] {
-  const byGroup = new Map<string, GoalItem[]>();
-  for (const item of items) {
-    const list = byGroup.get(item.group_id) ?? [];
-    list.push(item);
-    byGroup.set(item.group_id, list);
-  }
-  return [...byGroup.values()];
-}
 
 export function GoalSetup() {
   const { session } = useAuth();
   const [items, setItems] = useState<GoalItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState<number | null>(weekdayOf(todayKey()));
 
   const [label, setLabel] = useState('');
   const [kind, setKind] = useState<GoalKind>('count');
@@ -36,11 +18,12 @@ export function GoalSetup() {
 
   const load = async () => {
     if (!session) return;
+    await ensureTodayGoals(session.user.id);
     const { data, error: fetchError } = await supabase
       .from('goal_items')
       .select('*')
       .eq('user_id', session.user.id)
-      .is('archived_at', null)
+      .eq('for_date', todayKey())
       .order('sort_order', { ascending: true });
     if (fetchError) setError(fetchError.message);
     setItems(data ?? []);
@@ -52,8 +35,6 @@ export function GoalSetup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id]);
 
-  const visibleItems = items.filter((item) => item.day_of_week === selectedDay);
-
   const addGoal = async (e: FormEvent, groupId?: string) => {
     e.preventDefault();
     if (!session) return;
@@ -64,8 +45,8 @@ export function GoalSetup() {
       label: label.trim(),
       kind,
       target: kind === 'count' ? target : null,
-      day_of_week: selectedDay,
-      sort_order: visibleItems.length,
+      for_date: todayKey(),
+      sort_order: items.length,
     });
     if (insertError) {
       setError(insertError.message);
@@ -77,37 +58,27 @@ export function GoalSetup() {
     await load();
   };
 
-  const archive = async (id: string) => {
-    await supabase.from('goal_items').update({ archived_at: new Date().toISOString() }).eq('id', id);
+  // Only removes today's row - other dates (including any that were
+  // already copied forward from today, or copied from before) are
+  // untouched, since each date's items are independent.
+  const removeItem = async (id: string) => {
+    await supabase.from('goal_items').delete().eq('id', id);
     await load();
   };
 
   if (loading) return <p>Loading...</p>;
 
-  const groups = groupByGroupId(visibleItems);
+  const groups = groupGoalItems(items);
 
   return (
     <div className="page">
-      <h1>Your daily checklist</h1>
+      <h1>Today's checklist</h1>
       <p className="hint">
         Every group below must have at least one satisfied item to complete your day. Add an "OR
         alternative" to a group so any one of several things counts (e.g. "apply to 5 jobs" OR
-        "upskill in AI"). Each day of the week has its own separate checklist - switch tabs below
-        to edit a different day.
+        "upskill in AI"). This only edits today - tomorrow starts as a copy of whatever today ends
+        up looking like, and you can change it independently from there.
       </p>
-
-      <div className="day-tabs">
-        {DAY_TABS.map((tab) => (
-          <button
-            type="button"
-            key={tab.label}
-            className={tab.value === selectedDay ? 'day-tab day-tab--selected' : 'day-tab'}
-            onClick={() => setSelectedDay(tab.value)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
 
       {groups.map((group) => (
         <div className="goal-group" key={group[0].group_id}>
@@ -117,20 +88,15 @@ export function GoalSetup() {
                 {item.label}
                 {item.kind === 'count' ? ` (target: ${item.target})` : ' (yes/no)'}
               </span>
-              <button onClick={() => archive(item.id)}>Remove</button>
+              <button onClick={() => removeItem(item.id)}>Remove</button>
             </div>
           ))}
-          <AddAlternative
-            groupId={group[0].group_id}
-            dayOfWeek={selectedDay}
-            onAdded={load}
-            nextSort={visibleItems.length}
-          />
+          <AddAlternative groupId={group[0].group_id} onAdded={load} nextSort={items.length} />
         </div>
       ))}
 
       <form onSubmit={(e) => addGoal(e)} className="goal-form">
-        <h3>Add a new checklist item for {DAY_TABS.find((t) => t.value === selectedDay)?.label}</h3>
+        <h3>Add a new checklist item</h3>
         <input
           required
           placeholder="e.g. Apply to 5 jobs"
@@ -160,12 +126,10 @@ export function GoalSetup() {
 
 function AddAlternative({
   groupId,
-  dayOfWeek,
   onAdded,
   nextSort,
 }: {
   groupId: string;
-  dayOfWeek: number | null;
   onAdded: () => void;
   nextSort: number;
 }) {
@@ -184,7 +148,7 @@ function AddAlternative({
       label: label.trim(),
       kind,
       target: kind === 'count' ? target : null,
-      day_of_week: dayOfWeek,
+      for_date: todayKey(),
       sort_order: nextSort,
     });
     setLabel('');
