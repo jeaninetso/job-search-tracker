@@ -36,7 +36,7 @@ h1 {
 
 .subtitle {
   font-family: var(--font-subtitle);
-  color: var(--muted);
+  color: var(--text);
 }
 
 .nav {
@@ -120,7 +120,7 @@ button:disabled {
 }
 
 .hint {
-  color: var(--muted);
+  color: var(--text);
   font-size: 0.9rem;
   font-family: var(--font-subtitle);
 }
@@ -161,7 +161,7 @@ button:disabled {
 }
 
 .goal-group {
-  background: var(--card);
+  background: var(--field);
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -180,6 +180,11 @@ button:disabled {
 
 .goal-item {
   padding: 0.4rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .count-row {
