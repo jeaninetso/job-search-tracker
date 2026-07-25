@@ -41,17 +41,66 @@ h1 {
 
 .nav {
   display: flex;
-  gap: 1.5rem;
   align-items: center;
+  justify-content: space-between;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--card);
 }
 
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .nav a {
+  position: relative;
   color: var(--text);
   text-decoration: none;
   font-weight: 700;
   font-family: var(--font-subtitle);
+  padding-bottom: 2px;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: #4f8a94;
+  transform: translateY(-1px);
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.nav-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  border-radius: 999px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.nav-profile:hover {
+  background: var(--card);
+  transform: translateY(-1px);
 }
 
 .page {

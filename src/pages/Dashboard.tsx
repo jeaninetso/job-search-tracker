@@ -6,9 +6,8 @@ import { evaluateGroups, isDayComplete } from '../lib/goals';
 import { computeStreak, getStreakFlames } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
+import { todayKey } from '../lib/date';
 import type { DailyProgress, GoalItem } from '../types';
-
-const todayKey = () => formatISO(new Date(), { representation: 'date' });
 
 export function Dashboard() {
   const { session, profile } = useAuth();
@@ -25,11 +24,13 @@ export function Dashboard() {
     if (!session) return;
     const sixtyDaysAgo = formatISO(new Date(Date.now() - 60 * 86400000), { representation: 'date' });
     const [{ data: goalData }, { data: historyData }] = await Promise.all([
+      // Includes archived items - historical days are evaluated against
+      // whatever was active on that specific day, not the current
+      // checklist, so archiving a goal doesn't rewrite past completions.
       supabase
         .from('goal_items')
         .select('*')
         .eq('user_id', session.user.id)
-        .is('archived_at', null)
         .order('sort_order', { ascending: true }),
       // 60 days back is enough runway for any realistic streak while keeping the query light.
       supabase
@@ -141,7 +142,7 @@ export function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
-  if (items.length === 0) {
+  if (groups.length === 0) {
     return (
       <div className="page">
         <div className="greeting-row">
@@ -157,7 +158,7 @@ export function Dashboard() {
     <div className="page">
       {celebrating && <Confetti />}
       <div className="greeting-row">
-        <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} />
+        <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} seed={profile?.id} />
         <h1>Today</h1>
       </div>
       <p className={streak > 0 ? 'streak streak--active' : 'streak'}>

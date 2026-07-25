@@ -1,10 +1,24 @@
 import type { DailyProgress, GoalGroupStatus, GoalItem } from '../types';
+import { dateKey, todayKey } from './date';
 
-/** Groups a user's active goal items by group_id (OR conditions share a group_id). */
-export function groupGoalItems(items: GoalItem[]): GoalItem[][] {
+/**
+ * Was this item part of the checklist on the given day? Based on the
+ * item's own created_at/archived_at, not "is it archived right now" - so
+ * archiving a goal today doesn't retroactively change whether past days
+ * met their requirements. Archiving takes effect the day it happens
+ * (a day is still evaluated with the item if archived later that same day).
+ */
+export function isItemActiveOn(item: GoalItem, dayKey: string): boolean {
+  if (dateKey(item.created_at) > dayKey) return false;
+  if (item.archived_at && dateKey(item.archived_at) <= dayKey) return false;
+  return true;
+}
+
+/** Groups the items active on a given day by group_id (OR conditions share a group_id). */
+export function groupGoalItems(items: GoalItem[], dayKey: string = todayKey()): GoalItem[][] {
   const byGroup = new Map<string, GoalItem[]>();
   for (const item of items) {
-    if (item.archived_at) continue;
+    if (!isItemActiveOn(item, dayKey)) continue;
     const list = byGroup.get(item.group_id) ?? [];
     list.push(item);
     byGroup.set(item.group_id, list);
@@ -21,9 +35,10 @@ export function isItemSatisfied(item: GoalItem, progress: DailyProgress | undefi
 /** A group (OR set) is satisfied if any item in it is satisfied. */
 export function evaluateGroups(
   items: GoalItem[],
-  progressByItemId: Map<string, DailyProgress>
+  progressByItemId: Map<string, DailyProgress>,
+  dayKey: string = todayKey()
 ): GoalGroupStatus[] {
-  return groupGoalItems(items).map((groupItems) => ({
+  return groupGoalItems(items, dayKey).map((groupItems) => ({
     group_id: groupItems[0].group_id,
     items: groupItems,
     satisfied: groupItems.some((item) => isItemSatisfied(item, progressByItemId.get(item.id))),

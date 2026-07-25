@@ -1,22 +1,24 @@
-import { formatISO, subDays } from 'date-fns';
+import { subDays } from 'date-fns';
 import type { DailyProgress, GoalItem } from '../types';
 import { evaluateGroups, isDayComplete } from './goals';
+import { dateKey } from './date';
 
 /**
  * Computes the current streak length for a user.
  *
- * Uses the user's CURRENT active goal items to evaluate every past day.
- * This means editing your checklist retroactively reshapes how past days
- * read (a known, accepted simplification for v1 - we don't version goal
- * history). Today only counts once it's actually complete; an incomplete
- * "today" doesn't break the streak, it just isn't counted yet.
+ * `allItems` should include archived items - each day is evaluated against
+ * whichever items were actually active ON that day (via each item's own
+ * created_at/archived_at), not the current checklist. That's what makes
+ * archiving a goal not rewrite whether past days were "complete."  Today
+ * only counts once it's actually complete; an incomplete "today" doesn't
+ * break the streak, it just isn't counted yet.
  */
 export function computeStreak(
-  activeItems: GoalItem[],
+  allItems: GoalItem[],
   progressRows: DailyProgress[],
   today: Date
 ): number {
-  if (activeItems.length === 0) return 0;
+  if (allItems.length === 0) return 0;
 
   const progressByDate = new Map<string, Map<string, DailyProgress>>();
   for (const row of progressRows) {
@@ -26,9 +28,9 @@ export function computeStreak(
   }
 
   const dayIsComplete = (date: Date): boolean => {
-    const key = formatISO(date, { representation: 'date' });
+    const key = dateKey(date);
     const byItem = progressByDate.get(key) ?? new Map<string, DailyProgress>();
-    return isDayComplete(evaluateGroups(activeItems, byItem));
+    return isDayComplete(evaluateGroups(allItems, byItem, key));
   };
 
   let streak = 0;

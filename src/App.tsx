@@ -7,6 +7,7 @@ import { GoalSetup } from './pages/GoalSetup';
 import { Dashboard } from './pages/Dashboard';
 import { Feed } from './pages/Feed';
 import { Profile } from './pages/Profile';
+import { Avatar } from './components/Avatar';
 import './App.css';
 
 function Gate({ children }: { children: React.ReactNode }) {
@@ -24,13 +25,20 @@ function Nav() {
   if (!profile) return null;
   return (
     <nav className="nav">
-      <Link to="/">Today</Link>
-      <Link to="/goals">My Goals</Link>
-      <Link to="/feed">The Group</Link>
-      <Link to="/profile">My Profile</Link>
-      <button className="link-button" onClick={() => supabase.auth.signOut()}>
-        Sign out
-      </button>
+      <div className="nav-links">
+        <Link to="/">Today</Link>
+        <Link to="/goals">My Goals</Link>
+        <Link to="/feed">The Group</Link>
+      </div>
+      <div className="nav-right">
+        <Link to="/profile" className="nav-profile">
+          <Avatar name={profile.display_name} avatarKey={profile.avatar_key} seed={profile.id} size={28} />
+          <span>{profile.display_name}</span>
+        </Link>
+        <button className="link-button" onClick={() => supabase.auth.signOut()}>
+          Sign out
+        </button>
+      </div>
     </nav>
   );
 }

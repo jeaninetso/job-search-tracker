@@ -5,9 +5,8 @@ import { evaluateGroups, isDayComplete } from '../lib/goals';
 import { computeStreak, getStreakFlames } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
 import { getStatusLabel } from '../lib/presets';
+import { todayKey } from '../lib/date';
 import type { DailyProgress, GoalItem, Profile } from '../types';
-
-const todayKey = () => formatISO(new Date(), { representation: 'date' });
 
 interface MemberStatus {
   profile: Profile;
@@ -23,9 +22,11 @@ export function Feed() {
   useEffect(() => {
     const load = async () => {
       const sixtyDaysAgo = formatISO(new Date(Date.now() - 60 * 86400000), { representation: 'date' });
+      // Includes archived goal items - see Dashboard.tsx's load() for why:
+      // history is evaluated per-day against what was active THAT day.
       const [{ data: profiles }, { data: allItems }, { data: allProgress }] = await Promise.all([
         supabase.from('profiles').select('*'),
-        supabase.from('goal_items').select('*').is('archived_at', null),
+        supabase.from('goal_items').select('*'),
         supabase.from('daily_progress').select('*').gte('entry_date', sixtyDaysAgo),
       ]);
 
@@ -53,7 +54,7 @@ export function Feed() {
           profile,
           streak: computeStreak(items, history, new Date()),
           dayComplete: isDayComplete(groups),
-          hasGoals: items.length > 0,
+          hasGoals: groups.length > 0,
         };
       });
 
