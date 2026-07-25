@@ -2,12 +2,12 @@ import { useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { Avatar } from '../components/Avatar';
-import { AVATAR_PRESETS, STATUS_PRESETS } from '../lib/presets';
+import { AVATAR_PRESETS, STATUS_PRESETS, getAvatarPreset } from '../lib/presets';
 
 export function Profile() {
   const { profile, refreshProfile } = useAuth();
   const [displayName, setDisplayName] = useState(profile?.display_name ?? '');
-  const [avatarKey, setAvatarKey] = useState(profile?.avatar_key ?? AVATAR_PRESETS[0].key);
+  const [avatarKey, setAvatarKey] = useState(getAvatarPreset(profile?.avatar_key, profile?.id).key);
   const [bio, setBio] = useState(profile?.bio ?? '');
   const [status, setStatus] = useState(profile?.status ?? '');
   const [saving, setSaving] = useState(false);
@@ -16,11 +16,21 @@ export function Profile() {
 
   if (!profile) return null;
 
+  // Any edit after a successful save re-enables the button - "saved" only
+  // reflects "nothing has changed since the last save."
+  const withDirty = <T,>(setter: (value: T) => void) => (value: T) => {
+    setSaved(false);
+    setter(value);
+  };
+  const setDisplayNameDirty = withDirty(setDisplayName);
+  const setAvatarKeyDirty = withDirty(setAvatarKey);
+  const setBioDirty = withDirty(setBio);
+  const setStatusDirty = withDirty(setStatus);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
-    setSaved(false);
     const { error: updateError } = await supabase
       .from('profiles')
       .update({
@@ -51,7 +61,7 @@ export function Profile() {
           required
           maxLength={40}
           value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          onChange={(e) => setDisplayNameDirty(e.target.value)}
         />
 
         <span className="field-label">Avatar</span>
@@ -65,7 +75,7 @@ export function Profile() {
                   ? 'avatar-picker-option avatar-picker-option--selected'
                   : 'avatar-picker-option'
               }
-              onClick={() => setAvatarKey(preset.key)}
+              onClick={() => setAvatarKeyDirty(preset.key)}
               aria-label={preset.label}
             >
               <Avatar name={displayName || '?'} avatarKey={preset.key} size={44} />
@@ -78,7 +88,7 @@ export function Profile() {
           <button
             type="button"
             className={status === '' ? 'status-picker-option status-picker-option--selected' : 'status-picker-option'}
-            onClick={() => setStatus('')}
+            onClick={() => setStatusDirty('')}
           >
             No status
           </button>
@@ -91,7 +101,7 @@ export function Profile() {
                   ? 'status-picker-option status-picker-option--selected'
                   : 'status-picker-option'
               }
-              onClick={() => setStatus(preset.key)}
+              onClick={() => setStatusDirty(preset.key)}
             >
               {preset.label}
             </button>
@@ -106,16 +116,15 @@ export function Profile() {
           className="bio-field"
           maxLength={280}
           value={bio}
-          onChange={(e) => setBio(e.target.value)}
+          onChange={(e) => setBioDirty(e.target.value)}
           placeholder="What are you looking for? Anything the group should know?"
         />
 
         <div style={{ marginTop: '1.5rem' }}>
-          <button type="submit" disabled={saving || !displayName.trim()}>
-            {saving ? 'Saving...' : 'Save profile'}
+          <button type="submit" disabled={saving || saved || !displayName.trim()}>
+            {saving ? 'Saving...' : saved ? 'Saved' : 'Save profile'}
           </button>
         </div>
-        {saved && <p className="day-status--complete">Saved.</p>}
         {error && <p className="error">{error}</p>}
       </form>
     </div>

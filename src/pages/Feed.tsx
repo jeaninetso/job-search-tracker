@@ -77,7 +77,7 @@ export function Feed() {
         {sorted.map(({ profile, streak, dayComplete, hasGoals }) => (
           <div className="feed-card" key={profile.id}>
             <div className="feed-identity">
-              <Avatar name={profile.display_name} avatarKey={profile.avatar_key} />
+              <Avatar name={profile.display_name} avatarKey={profile.avatar_key} seed={profile.id} />
               <div className="feed-name-block">
                 <span className="feed-name">{profile.display_name}</span>
                 {getStatusLabel(profile.status) && (

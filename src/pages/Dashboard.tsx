@@ -145,7 +145,7 @@ export function Dashboard() {
     return (
       <div className="page">
         <div className="greeting-row">
-          <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} />
+          <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} seed={profile?.id} />
           <h1>Hey {profile?.display_name}</h1>
         </div>
         <p>You haven't set up a daily checklist yet. Head to "My Goals" to add one.</p>

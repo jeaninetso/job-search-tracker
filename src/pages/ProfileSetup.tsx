@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
+import { pickRandomAvatarKey } from '../lib/presets';
 
 export function ProfileSetup() {
   const { session, refreshProfile } = useAuth();
@@ -16,6 +17,7 @@ export function ProfileSetup() {
     const { error: upsertError } = await supabase.from('profiles').insert({
       id: session.user.id,
       display_name: displayName.trim(),
+      avatar_key: pickRandomAvatarKey(),
     });
     setSubmitting(false);
     if (upsertError) {

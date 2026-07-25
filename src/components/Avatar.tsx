@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { getAvatarPreset, getInitials } from '../lib/presets';
 
-export function Avatar({ name, avatarKey, size = 40 }: { name: string; avatarKey: string | null; size?: number }) {
-  const preset = getAvatarPreset(avatarKey);
+interface AvatarProps {
+  name: string;
+  avatarKey: string | null;
+  size?: number;
+  /** Falls back to a stable pseudo-random preset (e.g. user id) when avatarKey is null/unmatched. */
+  seed?: string;
+}
+
+export function Avatar({ name, avatarKey, size = 40, seed }: AvatarProps) {
+  const preset = getAvatarPreset(avatarKey, seed);
   const [failed, setFailed] = useState(false);
 
   if (failed) {

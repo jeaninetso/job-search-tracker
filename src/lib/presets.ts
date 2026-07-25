@@ -21,8 +21,30 @@ export const AVATAR_PRESETS: AvatarPreset[] = [
 
 export const DEFAULT_AVATAR_KEY = AVATAR_PRESETS[0].key;
 
-export function getAvatarPreset(key: string | null | undefined): AvatarPreset {
-  return AVATAR_PRESETS.find((preset) => preset.key === key) ?? AVATAR_PRESETS[0];
+/** True random pick - use for a one-time assignment (e.g. at signup), never in a render path. */
+export function pickRandomAvatarKey(): string {
+  return AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)].key;
+}
+
+function hashStringToIndex(str: string, mod: number): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  return hash % mod;
+}
+
+/**
+ * Resolves a preset by key. If the key is missing/unmatched and a seed
+ * (e.g. user id) is given, falls back to a stable pseudo-random pick
+ * derived from that seed - varied per user, but the same on every render
+ * (a real Math.random() fallback would flicker on every re-render).
+ */
+export function getAvatarPreset(key: string | null | undefined, seed?: string): AvatarPreset {
+  const found = AVATAR_PRESETS.find((preset) => preset.key === key);
+  if (found) return found;
+  if (seed) return AVATAR_PRESETS[hashStringToIndex(seed, AVATAR_PRESETS.length)];
+  return AVATAR_PRESETS[0];
 }
 
 export function getInitials(name: string): string {

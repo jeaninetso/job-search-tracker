@@ -1,6 +1,7 @@
 :root {
-  --bg-start: #fff1e6; /* cream */
-  --bg-end: #fde2e4; /* blush pink - adjacent to cream in the palette strip */
+  --bg-start: #e2ece9; /* sage mint */
+  --bg-mid: #bee1e6; /* teal */
+  --bg-end: #dfe7fd; /* periwinkle - 3 hue-adjacent turquoise-family stops */
   --card: #eae4e9; /* light lavender-gray */
   --field: #ffffff; /* inputs, recessed above card */
   --text: #33303a; /* dark neutral - not from the swatch, added for legibility on a light theme */
@@ -23,13 +24,13 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg-start), var(--bg-end)) fixed;
+  background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end)) fixed;
   color: var(--text);
 }
 
 h1 {
   font-family: var(--font-title);
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.02em;
 }
 
@@ -271,7 +272,7 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: var(--card);
+  background: var(--field);
   padding: 0.75rem 1rem;
   border-radius: 10px;
 }
@@ -342,10 +343,11 @@ button:disabled {
 }
 
 .avatar-picker-option {
-  padding: 0;
+  padding: 3px;
   border: 2px solid transparent;
-  border-radius: 999px;
+  border-radius: 26%;
   background: none;
+  line-height: 0;
 }
 
 .avatar-picker-option--selected {
