@@ -1,20 +1,23 @@
 :root {
-  --bg-start: #223028; /* dark sage */
-  --bg-mid: #1d2e32; /* dark teal */
-  --bg-end: #202544; /* dark periwinkle-navy - same hue journey as before, just dark */
-  --card: #363242; /* elevated dark surface */
-  --field: #2b2836; /* inputs + card-style surfaces (goal/feed cards, badges) */
-  --text: #f0efeb; /* light - reusing the "warm gray" pastel as dark-mode text */
-  --muted: #a39cae; /* muted light lavender-gray, for secondary/hint text */
-  --accent: #fad2e1; /* rose - unchanged, still pops against a dark bg */
-  --accent-contrast: #2a2733; /* fixed dark, independent of --text (which is now light) */
-  --good: #bee1e6; /* teal, success/done states */
-  --danger: #f28b96; /* brightened from the light-mode value for dark-bg contrast */
+  --bg-start: #fdfcf6; /* brightened - near-white warm tint */
+  --bg-mid: #fbf6e0; /* light beige tint (from Beige) */
+  --bg-end: #fff3d6; /* light gold tint (from Royal Gold) */
+  --card: #ffffff; /* white cards, per the reference style */
+  --border: #083d77; /* Regal Navy - the outline around every card */
+  --field: #fbf9f0; /* very light beige, for recessed inputs (distinct from white cards) */
+  --text: #083d77; /* Regal Navy */
+  --muted: #5b7a99; /* lighter navy tint - not one of the 5 swatches, added for secondary text legible on white */
+  --accent: #f95738; /* Tomato - primary buttons/CTA */
+  --accent-contrast: #ffffff;
+  --good: #c9962e; /* deepened from Royal Gold (#f4d35e is too light for readable text on white) */
+  --good-fill: #f4d35e; /* raw Royal Gold, for larger fills where contrast matters less */
+  --sandy: #ee964b; /* Sandy Brown - streak flame, secondary warmth */
+  --danger: #d6432a; /* deepened from Tomato so error text reads distinctly from accent buttons */
   --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-title: 'Bitcount Single', monospace;
   --font-subtitle: 'Space Mono', monospace;
   font-family: var(--font-body);
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -44,7 +47,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--card);
+  border-bottom: 1px solid var(--border);
 }
 
 .nav-links {
@@ -81,7 +84,7 @@ h1 {
 }
 
 .nav-links a:hover {
-  color: var(--good);
+  color: var(--accent);
   transform: translateY(-1px);
 }
 
@@ -99,7 +102,7 @@ h1 {
 }
 
 .nav-profile:hover {
-  background: var(--card);
+  background: var(--field);
   transform: translateY(-1px);
 }
 
@@ -114,6 +117,7 @@ h1 {
   margin: 4rem auto;
   padding: 2rem;
   background: var(--card);
+  border: 1.5px solid var(--border);
   border-radius: 12px;
   text-align: center;
 }
@@ -133,7 +137,7 @@ button {
   font-family: var(--font-body);
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
-  border: 1px solid var(--card);
+  border: 1px solid var(--border);
   background: var(--field);
   color: var(--text);
 }
@@ -148,7 +152,7 @@ button {
 }
 
 button:not(:disabled):hover {
-  box-shadow: 0 4px 12px rgba(51, 48, 58, 0.18);
+  box-shadow: 0 4px 12px rgba(8, 61, 119, 0.18);
 }
 
 button:not(:disabled):active {
@@ -182,6 +186,7 @@ button:disabled {
   font-size: 1.5rem;
   font-weight: 700;
   font-family: var(--font-title);
+  color: var(--sandy);
 }
 
 .streak--active {
@@ -210,21 +215,21 @@ button:disabled {
 }
 
 .goal-group {
-  background: var(--field);
+  background: var(--card);
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
-  border: 1px solid transparent;
+  border: 1.5px solid var(--border);
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
 }
 
 .goal-group:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(51, 48, 58, 0.12);
+  box-shadow: 0 6px 16px rgba(8, 61, 119, 0.12);
 }
 
 .goal-group--done {
-  border: 1px solid var(--good);
+  border-color: var(--good);
 }
 
 .goal-item {
@@ -262,7 +267,7 @@ button:disabled {
 }
 
 .progress-bar-fill--done {
-  background: var(--good);
+  background: var(--good-fill);
 }
 
 .check-label {
@@ -329,9 +334,10 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: var(--field);
+  background: var(--card);
   padding: 0.75rem 1rem;
   border-radius: 10px;
+  border: 1.5px solid var(--border);
 }
 
 .feed-name {
@@ -362,7 +368,7 @@ button:disabled {
 }
 
 .avatar--fallback {
-  background: var(--card);
+  background: var(--field);
   color: var(--text);
   font-weight: 700;
   font-family: var(--font-subtitle);

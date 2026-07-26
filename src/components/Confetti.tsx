@@ -1,7 +1,6 @@
-// Deeper siblings of the pastel palette - the palette itself is too light
-// to read against the light background, so these are saturated up a bit
-// just for confetti visibility.
-const COLORS = ['#f7b6c2', '#ffd59e', '#a8d8de', '#b8c6f5', '#c9c2d6'];
+// Straight from the palette (Regal Navy, Royal Gold, Sandy Brown, Tomato) -
+// Beige is left out, too pale to read as confetti against a bright background.
+const COLORS = ['#083d77', '#f4d35e', '#ee964b', '#f95738'];
 const PIECES = 28;
 
 export function Confetti() {
