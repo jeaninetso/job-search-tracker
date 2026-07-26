@@ -14,7 +14,7 @@
   --progress: #999999; /* in-progress bar fill only - lighter than --good so "done" reads as more solid */
   --good: #000000; /* done states - pure black, the darkest value in the system */
   --danger: #1a1a1a; /* same as text - errors read through bold weight, not a color cue */
-  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto, Helvetica, Arial, sans-serif;
   font-family: var(--font-body);
   font-size: 18px; /* up from the 16px default, for readability */
   line-height: 1.5;

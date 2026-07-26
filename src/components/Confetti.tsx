@@ -1,6 +1,6 @@
-// Monochrome - a range of grays from light to near-black, still gives
-// the burst visual motion/variety without introducing any hue.
-const COLORS = ['#1a1a1a', '#4d4d4d', '#808080', '#b3b3b3', '#d9d9d9'];
+// The one exception to the monochrome rule, by explicit request - a
+// classic bright multi-color confetti burst.
+const COLORS = ['#e63946', '#f4a261', '#e9c46a', '#2a9d8f', '#4361ee', '#a855f7'];
 const PIECES = 28;
 
 export function Confetti() {
