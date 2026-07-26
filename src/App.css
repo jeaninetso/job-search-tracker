@@ -1,24 +1,23 @@
 :root {
-  /* All contrast-critical pairs below are checked against WCAG AA (4.5:1
-     normal text, 3:1 large text/UI) using the actual computed values, not
-     eyeballed - see commit message for the numbers. Several colors are
-     darkened from their literal palette hex because the raw swatches
-     (especially Royal Gold and Sandy Brown) are too light to pass at
-     normal text sizes against this background. */
-  --bg: #ebebd3; /* Beige - solid, single color per request (was a 3-stop gradient) */
+  /* Monochrome - grayscale only, no hues. Contrast checked against WCAG
+     AA (4.5:1 normal text): text 15.55:1 on bg / 17.4:1 on card, muted
+     5.13:1 on bg / 5.74:1 on card, white-on-accent 17.4:1. All comfortably
+     pass with room to spare. */
+  --bg: #f2f2f2;
   --card: #ffffff;
-  --border: #083d77; /* Regal Navy - outline on every card */
-  --field: #f5f4e7; /* light beige tint, inputs (distinct from white cards) */
-  --text: #083d77; /* Regal Navy - 8.93:1 on bg, 10.8:1 on white cards */
-  --muted: #3d5670; /* darkened navy tint - 6.28:1 on bg (a lighter tint only hit 3.7:1, failed AA) */
-  --accent: #c93d26; /* darkened from Tomato #f95738 - raw value only gave 3.26:1 with white text, this gives 5.03:1 */
+  --field: #ffffff; /* inputs - same as card, the border is what defines them */
+  --border: #222222;
+  --text: #1a1a1a;
+  --muted: #666666;
+  --accent: #1a1a1a; /* buttons, active/selected states */
   --accent-contrast: #ffffff;
-  --good: #705515; /* darkened from Royal Gold - raw #f4d35e gave 2.2:1, this gives 5.79:1 */
-  --good-fill: #f4d35e; /* raw Royal Gold, fills only (progress bar) - not used as text color */
-  --sandy: #96501c; /* darkened from Sandy Brown - raw value gave 1.91:1, this gives 5.01:1 */
-  --danger: #b0331d; /* darkened from Tomato, kept distinct from --accent - 5.2:1 on bg */
+  --progress: #999999; /* in-progress bar fill only - lighter than --good so "done" reads as more solid */
+  --good: #000000; /* done states - pure black, the darkest value in the system */
+  --danger: #1a1a1a; /* same as text - errors read through bold weight, not a color cue */
   --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   font-family: var(--font-body);
+  font-size: 18px; /* up from the 16px default, for readability */
+  line-height: 1.5;
   color-scheme: light;
 }
 
@@ -84,7 +83,7 @@ h1 {
 }
 
 .nav-links a:hover {
-  color: var(--accent);
+  color: var(--muted);
   transform: translateY(-1px);
 }
 
@@ -102,7 +101,7 @@ h1 {
 }
 
 .nav-profile:hover {
-  background: var(--field);
+  background: var(--bg);
   transform: translateY(-1px);
 }
 
@@ -152,7 +151,7 @@ button {
 }
 
 button:not(:disabled):hover {
-  box-shadow: 0 4px 12px rgba(8, 61, 119, 0.18);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
 
 button:not(:disabled):active {
@@ -174,17 +173,18 @@ button:disabled {
 
 .hint {
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .error {
   color: var(--danger);
+  font-weight: 700;
 }
 
 .streak {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--sandy);
+  color: var(--text);
 }
 
 .streak--active {
@@ -209,7 +209,7 @@ button:disabled {
 
 .day-status--complete {
   color: var(--good);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .goal-group {
@@ -223,11 +223,12 @@ button:disabled {
 
 .goal-group:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(8, 61, 119, 0.12);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .goal-group--done {
   border-color: var(--good);
+  border-width: 2px;
 }
 
 .goal-item {
@@ -252,20 +253,21 @@ button:disabled {
   flex-basis: 100%;
   height: 8px;
   border-radius: 999px;
-  background: var(--field);
+  background: var(--bg);
   overflow: hidden;
   margin-top: 0.4rem;
+  border: 1px solid var(--border);
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--accent);
+  background: var(--progress);
   border-radius: 999px;
   transition: width 0.3s ease, background 0.3s ease;
 }
 
 .progress-bar-fill--done {
-  background: var(--good-fill);
+  background: var(--good);
 }
 
 .check-label {
@@ -301,7 +303,7 @@ button:disabled {
 
 .or-hint {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   margin: 0.25rem 0 0;
 }
 
@@ -344,14 +346,16 @@ button:disabled {
 
 .feed-badge {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: var(--field);
+  background: var(--bg);
+  border: 1px solid var(--border);
 }
 
 .feed-badge--done {
   color: var(--good);
+  font-weight: 700;
 }
 
 .avatar {
@@ -364,7 +368,7 @@ button:disabled {
 }
 
 .avatar--fallback {
-  background: var(--field);
+  background: var(--bg);
   color: var(--text);
   font-weight: 700;
 }
@@ -382,7 +386,7 @@ button:disabled {
 }
 
 .feed-status {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--muted);
 }
 
@@ -420,9 +424,10 @@ button:disabled {
 }
 
 .status-picker-option {
-  background: var(--field);
+  background: var(--card);
   color: var(--text);
   font-weight: 500;
+  border: 1px solid var(--border);
 }
 
 .status-picker-option--selected {

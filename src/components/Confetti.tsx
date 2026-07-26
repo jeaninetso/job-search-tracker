@@ -1,6 +1,6 @@
-// Straight from the palette (Regal Navy, Royal Gold, Sandy Brown, Tomato) -
-// Beige is left out, too pale to read as confetti against a bright background.
-const COLORS = ['#083d77', '#f4d35e', '#ee964b', '#f95738'];
+// Monochrome - a range of grays from light to near-black, still gives
+// the burst visual motion/variety without introducing any hue.
+const COLORS = ['#1a1a1a', '#4d4d4d', '#808080', '#b3b3b3', '#d9d9d9'];
 const PIECES = 28;
 
 export function Confetti() {
