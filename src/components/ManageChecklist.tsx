@@ -6,7 +6,12 @@ import { todayKey } from '../lib/date';
 import { ensureTodayGoals } from '../lib/carryForward';
 import type { GoalItem, GoalKind } from '../types';
 
-export function GoalSetup() {
+interface ManageChecklistProps {
+  /** Called after any add/remove so the parent dashboard can refetch and reflect the change. */
+  onChange: () => void;
+}
+
+export function ManageChecklist({ onChange }: ManageChecklistProps) {
   const { session } = useAuth();
   const [items, setItems] = useState<GoalItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +61,7 @@ export function GoalSetup() {
     setKind('count');
     setTarget(5);
     await load();
+    onChange();
   };
 
   // Only removes today's row - other dates (including any that were
@@ -64,6 +70,7 @@ export function GoalSetup() {
   const removeItem = async (id: string) => {
     await supabase.from('goal_items').delete().eq('id', id);
     await load();
+    onChange();
   };
 
   if (loading) return <p>Loading...</p>;
@@ -71,8 +78,7 @@ export function GoalSetup() {
   const groups = groupGoalItems(items);
 
   return (
-    <div className="page">
-      <h1>Today's checklist</h1>
+    <div className="manage-checklist-body">
       <p className="hint">
         Every group below must have at least one satisfied item to complete your day. Add an "OR
         alternative" to a group so any one of several things counts (e.g. "apply to 5 jobs" OR
@@ -91,7 +97,14 @@ export function GoalSetup() {
               <button onClick={() => removeItem(item.id)}>Remove</button>
             </div>
           ))}
-          <AddAlternative groupId={group[0].group_id} onAdded={load} nextSort={items.length} />
+          <AddAlternative
+            groupId={group[0].group_id}
+            onAdded={async () => {
+              await load();
+              onChange();
+            }}
+            nextSort={items.length}
+          />
         </div>
       ))}
 

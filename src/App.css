@@ -43,8 +43,46 @@ h1 {
   letter-spacing: -0.01em;
 }
 
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+  margin-top: 0;
+}
+
 .subtitle {
   color: var(--text);
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0 1.5rem;
+}
+
+.manage-checklist {
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.25rem 1rem;
+  background: var(--card);
+}
+
+.manage-checklist summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600;
+  padding: 0.75rem 0;
+  color: var(--text);
+}
+
+.manage-checklist summary:hover {
+  color: var(--accent);
+}
+
+.manage-checklist-body {
+  padding-bottom: 1rem;
 }
 
 .nav {
@@ -240,6 +278,7 @@ button:disabled {
 .rail-avatar-halo {
   display: inline-flex;
   border-radius: 50%;
+  overflow: hidden;
   box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--accent-soft);
 }
 

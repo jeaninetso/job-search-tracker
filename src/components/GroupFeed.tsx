@@ -3,8 +3,8 @@ import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
 import { computeStreak, computeRecentDayStatuses, type DayStatus } from '../lib/streak';
-import { Avatar } from '../components/Avatar';
-import { StreakRail } from '../components/StreakRail';
+import { Avatar } from './Avatar';
+import { StreakRail } from './StreakRail';
 import { getStatusLabel } from '../lib/presets';
 import { todayKey } from '../lib/date';
 import type { DailyProgress, GoalItem, Profile } from '../types';
@@ -17,7 +17,7 @@ interface MemberStatus {
   hasGoals: boolean;
 }
 
-export function Feed() {
+export function GroupFeed() {
   const [members, setMembers] = useState<MemberStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -76,42 +76,38 @@ export function Feed() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="page">
-      <h1>The group</h1>
-      <p className="hint">Everyone's daily status. No ranking, just visibility.</p>
-      <div className="feed-list">
-        {sorted.map(({ profile, recentDays, streak, dayComplete, hasGoals }) => (
-          <div className="feed-card" key={profile.id}>
-            <div className="feed-identity">
-              <Avatar name={profile.display_name} avatarKey={profile.avatar_key} seed={profile.id} />
-              <div className="feed-name-block">
-                <span className="feed-name">{profile.display_name}</span>
-                {getStatusLabel(profile.status) && (
-                  <span className="feed-status">{getStatusLabel(profile.status)}</span>
-                )}
-              </div>
+    <div className="feed-list">
+      {sorted.map(({ profile, recentDays, streak, dayComplete, hasGoals }) => (
+        <div className="feed-card" key={profile.id}>
+          <div className="feed-identity">
+            <Avatar name={profile.display_name} avatarKey={profile.avatar_key} seed={profile.id} />
+            <div className="feed-name-block">
+              <span className="feed-name">{profile.display_name}</span>
+              {getStatusLabel(profile.status) && (
+                <span className="feed-status">{getStatusLabel(profile.status)}</span>
+              )}
             </div>
-            {hasGoals ? (
-              <>
-                <StreakRail
-                  days={recentDays}
-                  avatarName={profile.display_name}
-                  avatarKey={profile.avatar_key}
-                  avatarSeed={profile.id}
-                  size="compact"
-                  showAvatar={false}
-                />
-                <span className="feed-streak">{streak}</span>
-                <span className={dayComplete ? 'feed-badge feed-badge--done' : 'feed-badge'}>
-                  {dayComplete ? 'Done today' : 'In progress'}
-                </span>
-              </>
-            ) : (
-              <span className="feed-badge">No checklist yet</span>
-            )}
           </div>
-        ))}
-      </div>
+          {hasGoals ? (
+            <>
+              <StreakRail
+                days={recentDays}
+                avatarName={profile.display_name}
+                avatarKey={profile.avatar_key}
+                avatarSeed={profile.id}
+                size="compact"
+                showAvatar={false}
+              />
+              <span className="feed-streak">{streak}</span>
+              <span className={dayComplete ? 'feed-badge feed-badge--done' : 'feed-badge'}>
+                {dayComplete ? 'Done today' : 'In progress'}
+              </span>
+            </>
+          ) : (
+            <span className="feed-badge">No checklist yet</span>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
