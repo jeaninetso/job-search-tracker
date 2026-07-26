@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
-import { computeStreak, getStreakFlames } from '../lib/streak';
+import { computeStreak, computeRecentDayStatuses, type DayStatus } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
+import { StreakRail } from '../components/StreakRail';
 import { getStatusLabel } from '../lib/presets';
 import { todayKey } from '../lib/date';
 import type { DailyProgress, GoalItem, Profile } from '../types';
 
 interface MemberStatus {
   profile: Profile;
+  recentDays: DayStatus[];
   streak: number;
   dayComplete: boolean;
   hasGoals: boolean;
@@ -54,6 +56,7 @@ export function Feed() {
         const groups = evaluateGroups(todayItems, progressByItemId);
         return {
           profile,
+          recentDays: computeRecentDayStatuses(items, history, new Date()),
           streak: computeStreak(items, history, new Date()),
           dayComplete: isDayComplete(groups),
           hasGoals: groups.length > 0,
@@ -77,7 +80,7 @@ export function Feed() {
       <h1>The group</h1>
       <p className="hint">Everyone's daily status. No ranking, just visibility.</p>
       <div className="feed-list">
-        {sorted.map(({ profile, streak, dayComplete, hasGoals }) => (
+        {sorted.map(({ profile, recentDays, streak, dayComplete, hasGoals }) => (
           <div className="feed-card" key={profile.id}>
             <div className="feed-identity">
               <Avatar name={profile.display_name} avatarKey={profile.avatar_key} seed={profile.id} />
@@ -90,7 +93,15 @@ export function Feed() {
             </div>
             {hasGoals ? (
               <>
-                <span className="feed-streak">{getStreakFlames(streak)} {streak}</span>
+                <StreakRail
+                  days={recentDays}
+                  avatarName={profile.display_name}
+                  avatarKey={profile.avatar_key}
+                  avatarSeed={profile.id}
+                  size="compact"
+                  showAvatar={false}
+                />
+                <span className="feed-streak">{streak}</span>
                 <span className={dayComplete ? 'feed-badge feed-badge--done' : 'feed-badge'}>
                   {dayComplete ? 'Done today' : 'In progress'}
                 </span>

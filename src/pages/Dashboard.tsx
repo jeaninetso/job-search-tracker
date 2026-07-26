@@ -3,9 +3,10 @@ import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
-import { computeStreak, getStreakFlames } from '../lib/streak';
+import { computeStreak, computeRecentDayStatuses } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
+import { StreakRail } from '../components/StreakRail';
 import { todayKey } from '../lib/date';
 import { ensureTodayGoals } from '../lib/carryForward';
 import type { DailyProgress, GoalItem } from '../types';
@@ -87,6 +88,10 @@ export function Dashboard() {
   const groups = useMemo(() => evaluateGroups(todayItems, progressByItemId), [todayItems, progressByItemId]);
   const dayComplete = isDayComplete(groups);
   const streak = useMemo(() => computeStreak(items, history, new Date()), [items, history]);
+  const recentDays = useMemo(
+    () => computeRecentDayStatuses(items, history, new Date()),
+    [items, history]
+  );
 
   // Fire confetti only on the moment completion flips true, not on every
   // render/mount where it was already complete from an earlier session.
@@ -165,12 +170,15 @@ export function Dashboard() {
   return (
     <div className="page">
       {celebrating && <Confetti />}
-      <div className="greeting-row">
-        <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} seed={profile?.id} />
-        <h1>Today</h1>
-      </div>
-      <p className={streak > 0 ? 'streak streak--active' : 'streak'}>
-        {getStreakFlames(streak)} {streak} day streak
+      <h1>Today</h1>
+      <StreakRail
+        days={recentDays}
+        avatarName={profile?.display_name ?? '?'}
+        avatarKey={profile?.avatar_key ?? null}
+        avatarSeed={profile?.id}
+      />
+      <p className="streak-label">
+        {streak > 0 ? `${streak} day streak - keep it going` : 'Start your streak today'}
       </p>
       <p className={dayComplete ? 'day-status day-status--complete celebration-banner' : 'day-status'}>
         {dayComplete ? "You're done for today! 🎉" : 'Keep going.'}

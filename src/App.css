@@ -1,22 +1,26 @@
 :root {
-  /* Monochrome - grayscale only, no hues. Contrast checked against WCAG
-     AA (4.5:1 normal text): text 15.55:1 on bg / 17.4:1 on card, muted
-     5.13:1 on bg / 5.74:1 on card, white-on-accent 17.4:1. All comfortably
-     pass with room to spare. */
-  --bg: #f2f2f2;
+  /* Grounded in the app's own avatar art: sky and mint are sampled from
+     the astronaut illustration's actual palette, not invented fresh.
+     Contrast checked against WCAG AA (4.5:1 normal text): ink 14.4:1 on
+     bg / 15.38:1 on card, slate 5.38:1 / 5.75:1, mint-as-text 4.95:1,
+     white-on-coral 4.68:1, danger 5.09:1 / 5.44:1. */
+  --bg: #f4f8fb; /* soft sky-tinted off-white */
   --card: #ffffff;
-  --field: #ffffff; /* inputs - same as card, the border is what defines them */
-  --border: #222222;
-  --text: #1a1a1a;
-  --muted: #666666;
-  --accent: #1a1a1a; /* buttons, active/selected states */
+  --field: #ffffff;
+  --border: #d7e3ec; /* soft, barely-there - definition comes from shadow, not a heavy line */
+  --text: #102542; /* deep navy ink */
+  --muted: #54687d; /* slate */
+  --accent: #c94a26; /* warm coral - primary actions */
+  --accent-soft: #f2704a; /* lighter coral, decorative only (rail ring, in-progress fill) */
   --accent-contrast: #ffffff;
-  --progress: #999999; /* in-progress bar fill only - lighter than --good so "done" reads as more solid */
-  --good: #000000; /* done states - pure black, the darkest value in the system */
-  --danger: #1a1a1a; /* same as text - errors read through bold weight, not a color cue */
+  --good: #157a5c; /* mint, sampled from the avatar's suit color - success/done text */
+  --good-soft: #2fae8a; /* lighter mint, decorative only (rail trail, done fill) */
+  --sky: #bfe3f5; /* sampled from the avatar's background - tinted surfaces */
+  --danger: #c0392b;
+  --font-display: 'Space Grotesk', var(--font-body);
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto, Helvetica, Arial, sans-serif;
   font-family: var(--font-body);
-  font-size: 18px; /* up from the 16px default, for readability */
+  font-size: 18px;
   line-height: 1.5;
   color-scheme: light;
 }
@@ -33,6 +37,7 @@ body {
 }
 
 h1 {
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.75rem;
   letter-spacing: -0.01em;
@@ -47,7 +52,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--sky);
 }
 
 .nav-links {
@@ -67,6 +72,7 @@ h1 {
   color: var(--text);
   text-decoration: none;
   font-weight: 700;
+  font-family: var(--font-display);
   padding-bottom: 2px;
   transition: color 0.15s ease, transform 0.15s ease;
 }
@@ -83,7 +89,7 @@ h1 {
 }
 
 .nav-links a:hover {
-  color: var(--muted);
+  color: var(--accent);
   transform: translateY(-1px);
 }
 
@@ -101,7 +107,7 @@ h1 {
 }
 
 .nav-profile:hover {
-  background: var(--bg);
+  background: var(--sky);
   transform: translateY(-1px);
 }
 
@@ -116,8 +122,9 @@ h1 {
   margin: 4rem auto;
   padding: 2rem;
   background: var(--card);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(16, 37, 66, 0.06);
   text-align: center;
 }
 
@@ -147,11 +154,12 @@ button {
   border: none;
   color: var(--accent-contrast);
   font-weight: 700;
+  font-family: var(--font-display);
   transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 button:not(:disabled):hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 14px rgba(201, 74, 38, 0.28);
 }
 
 button:not(:disabled):active {
@@ -172,7 +180,7 @@ button:disabled {
 }
 
 .hint {
-  color: var(--text);
+  color: var(--muted);
   font-size: 1rem;
 }
 
@@ -181,25 +189,72 @@ button:disabled {
   font-weight: 700;
 }
 
-.streak {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text);
+.streak-label {
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.75rem 0 1.5rem;
 }
 
-.streak--active {
-  animation: pulse 1.8s ease-in-out infinite;
-  display: inline-block;
+.rail {
+  display: flex;
+  align-items: center;
+  margin: 0.5rem 0;
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
+.rail-step {
+  display: flex;
+  align-items: center;
+}
+
+.rail-link {
+  width: 22px;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.rail-link--lit {
+  background: var(--good-soft);
+}
+
+.rail-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.rail-dot--lit {
+  background: var(--good-soft);
+}
+
+.rail-dot--today {
+  background: var(--card);
+  border: 2px solid var(--accent);
+}
+
+.rail-avatar-halo {
+  display: inline-flex;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--accent-soft);
+}
+
+.rail--compact .rail-link {
+  width: 12px;
+  height: 2px;
+}
+
+.rail--compact .rail-dot {
+  width: 10px;
+  height: 10px;
+}
+
+.rail--compact .rail-dot--today {
+  border-width: 1.5px;
 }
 
 .day-status {
@@ -217,18 +272,19 @@ button:disabled {
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
-  border: 1.5px solid var(--border);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(16, 37, 66, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .goal-group:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 16px rgba(16, 37, 66, 0.1);
 }
 
 .goal-group--done {
   border-color: var(--good);
-  border-width: 2px;
+  background: #f2fbf8;
 }
 
 .goal-item {
@@ -261,13 +317,13 @@ button:disabled {
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--progress);
+  background: var(--accent-soft);
   border-radius: 999px;
   transition: width 0.3s ease, background 0.3s ease;
 }
 
 .progress-bar-fill--done {
-  background: var(--good);
+  background: var(--good-soft);
 }
 
 .check-label {
@@ -321,6 +377,7 @@ button:disabled {
 
 .goal-form h3 {
   width: 100%;
+  font-family: var(--font-display);
 }
 
 .feed-list {
@@ -336,12 +393,20 @@ button:disabled {
   background: var(--card);
   padding: 0.75rem 1rem;
   border-radius: 10px;
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(16, 37, 66, 0.05);
 }
 
 .feed-name {
   font-weight: 600;
   flex: 1;
+}
+
+.feed-streak {
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--text);
+  font-size: 0.95rem;
 }
 
 .feed-badge {
@@ -368,7 +433,7 @@ button:disabled {
 }
 
 .avatar--fallback {
-  background: var(--bg);
+  background: var(--sky);
   color: var(--text);
   font-weight: 700;
 }
@@ -413,7 +478,7 @@ button:disabled {
 }
 
 .avatar-picker-option--selected {
-  border-color: var(--text);
+  border-color: var(--accent);
 }
 
 .status-picker {
