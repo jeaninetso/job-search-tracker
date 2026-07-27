@@ -63,27 +63,6 @@ export function computeStreak(
   return streak;
 }
 
-export interface DayStatus {
-  dateKey: string;
-  complete: boolean;
-}
-
-/** Completion status for the last `count` days, oldest first, today last - powers the waypoint rail. */
-export function computeRecentDayStatuses(
-  allItems: GoalItem[],
-  progressRows: DailyProgress[],
-  today: Date,
-  count = 7
-): DayStatus[] {
-  const dayIsComplete = buildDayCompletionChecker(allItems, progressRows);
-  const statuses: DayStatus[] = [];
-  for (let i = count - 1; i >= 0; i--) {
-    const date = subDays(today, i);
-    statuses.push({ dateKey: dateKey(date), complete: dayIsComplete(date) });
-  }
-  return statuses;
-}
-
 /** More flames at longer streaks - a small visual reward for consistency. */
 export function getStreakFlames(streak: number): string {
   if (streak >= 30) return '🔥🔥🔥';

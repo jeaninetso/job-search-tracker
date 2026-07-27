@@ -3,10 +3,8 @@ import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
-import { computeStreak, computeRecentDayStatuses } from '../lib/streak';
 import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
-import { StreakRail } from '../components/StreakRail';
 import { ManageChecklist } from '../components/ManageChecklist';
 import { GroupFeed } from '../components/GroupFeed';
 import { todayKey } from '../lib/date';
@@ -89,11 +87,6 @@ export function Dashboard() {
 
   const groups = useMemo(() => evaluateGroups(todayItems, progressByItemId), [todayItems, progressByItemId]);
   const dayComplete = isDayComplete(groups);
-  const streak = useMemo(() => computeStreak(items, history, new Date()), [items, history]);
-  const recentDays = useMemo(
-    () => computeRecentDayStatuses(items, history, new Date()),
-    [items, history]
-  );
 
   // Fire confetti only on the moment completion flips true, not on every
   // render/mount where it was already complete from an earlier session.
@@ -160,95 +153,93 @@ export function Dashboard() {
   const hasChecklist = groups.length > 0;
 
   return (
-    <div className="page">
+    <div className="page page--dashboard">
       {celebrating && <Confetti />}
       <h1>Dashboard</h1>
 
-      {hasChecklist ? (
-        <>
-          <StreakRail
-            days={recentDays}
-            avatarName={profile?.display_name ?? '?'}
-            avatarKey={profile?.avatar_key ?? null}
-            avatarSeed={profile?.id}
-          />
-          <p className="streak-label">
-            {streak > 0 ? `${streak} day streak - keep it going` : 'Start your streak today'}
-          </p>
-          <p className={dayComplete ? 'day-status day-status--complete celebration-banner' : 'day-status'}>
-            {dayComplete ? "You're done for today! 🎉" : 'Keep going.'}
-          </p>
-          {error && <p className="error">{error}</p>}
+      <div className="dashboard-grid">
+        <div className="dashboard-main">
+          {hasChecklist ? (
+            <>
+              <p className={dayComplete ? 'day-status day-status--complete celebration-banner' : 'day-status'}>
+                {dayComplete ? "You're done for today! 🎉" : 'Keep going.'}
+              </p>
+              {error && <p className="error">{error}</p>}
 
-          {groups.map((group) => (
-            <div className={group.satisfied ? 'goal-group goal-group--done' : 'goal-group'} key={group.group_id}>
-              {group.items.map((item) => {
-                const progress = progressByItemId.get(item.id);
-                const saving = savingItemIds.has(item.id);
-                return (
-                  <div className="goal-item" key={item.id}>
-                    {item.kind === 'boolean' ? (
-                      <label className="check-label">
-                        <input
-                          type="checkbox"
-                          checked={progress?.current_done ?? false}
-                          disabled={saving}
-                          onChange={() => toggleBoolean(item)}
-                        />
-                        <span className={progress?.current_done ? 'check-box check-box--checked' : 'check-box'}>
-                          {progress?.current_done ? '✓' : ''}
-                        </span>
-                        {item.label}
-                      </label>
-                    ) : (
-                      <div className="count-row">
-                        <span>
-                          {item.label}: {progress?.current_value ?? 0} / {item.target}
-                        </span>
-                        <button disabled={saving} onClick={() => incrementCount(item, 1)}>
-                          +1
-                        </button>
-                        <button disabled={saving} onClick={() => incrementCount(item, -1)}>
-                          -1
-                        </button>
-                        <div className="progress-bar">
-                          <div
-                            className={
-                              (progress?.current_value ?? 0) >= (item.target ?? Infinity)
-                                ? 'progress-bar-fill progress-bar-fill--done'
-                                : 'progress-bar-fill'
-                            }
-                            style={{
-                              width: `${Math.min(100, ((progress?.current_value ?? 0) / (item.target ?? 1)) * 100)}%`,
-                            }}
-                          />
-                        </div>
+              {groups.map((group) => (
+                <div
+                  className={group.satisfied ? 'goal-group goal-group--done' : 'goal-group'}
+                  key={group.group_id}
+                >
+                  {group.items.map((item) => {
+                    const progress = progressByItemId.get(item.id);
+                    const saving = savingItemIds.has(item.id);
+                    return (
+                      <div className="goal-item" key={item.id}>
+                        {item.kind === 'boolean' ? (
+                          <label className="check-label">
+                            <input
+                              type="checkbox"
+                              checked={progress?.current_done ?? false}
+                              disabled={saving}
+                              onChange={() => toggleBoolean(item)}
+                            />
+                            <span className={progress?.current_done ? 'check-box check-box--checked' : 'check-box'}>
+                              {progress?.current_done ? '✓' : ''}
+                            </span>
+                            {item.label}
+                          </label>
+                        ) : (
+                          <div className="count-row">
+                            <span>
+                              {item.label}: {progress?.current_value ?? 0} / {item.target}
+                            </span>
+                            <button disabled={saving} onClick={() => incrementCount(item, 1)}>
+                              +1
+                            </button>
+                            <button disabled={saving} onClick={() => incrementCount(item, -1)}>
+                              -1
+                            </button>
+                            <div className="progress-bar">
+                              <div
+                                className={
+                                  (progress?.current_value ?? 0) >= (item.target ?? Infinity)
+                                    ? 'progress-bar-fill progress-bar-fill--done'
+                                    : 'progress-bar-fill'
+                                }
+                                style={{
+                                  width: `${Math.min(100, ((progress?.current_value ?? 0) / (item.target ?? 1)) * 100)}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-              {group.items.length > 1 && <p className="or-hint">(any one of these counts)</p>}
+                    );
+                  })}
+                  {group.items.length > 1 && <p className="or-hint">(any one of these counts)</p>}
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="greeting-row">
+              <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} seed={profile?.id} />
+              <p className="hint">You haven't set up a daily checklist yet - add one below to get started.</p>
             </div>
-          ))}
-        </>
-      ) : (
-        <div className="greeting-row">
-          <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} seed={profile?.id} />
-          <p className="hint">You haven't set up a daily checklist yet - add one below to get started.</p>
+          )}
+
+          <details className="manage-checklist" open={!hasChecklist}>
+            <summary>Manage today's checklist</summary>
+            <ManageChecklist onChange={load} />
+          </details>
         </div>
-      )}
 
-      <details className="manage-checklist" open={!hasChecklist}>
-        <summary>Manage today's checklist</summary>
-        <ManageChecklist onChange={load} />
-      </details>
-
-      <hr className="section-divider" />
-
-      <h2>The group</h2>
-      <p className="hint">Everyone's daily status. No ranking, just visibility.</p>
-      <GroupFeed />
+        <div className="dashboard-sidebar">
+          <h2>The group</h2>
+          <p className="hint">Everyone's daily status. No ranking, just visibility.</p>
+          <GroupFeed />
+        </div>
+      </div>
     </div>
   );
 }
