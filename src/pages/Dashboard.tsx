@@ -15,6 +15,7 @@ import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
 import { ManageChecklist } from '../components/ManageChecklist';
 import { GroupFeed } from '../components/GroupFeed';
+import { DailyNoteComposer } from '../components/DailyNoteComposer';
 import { todayKey } from '../lib/date';
 import { ensureTodayGoals } from '../lib/carryForward';
 import type { DailyProgress, GoalItem } from '../types';
@@ -201,6 +202,8 @@ export function Dashboard() {
 
       <div className="dashboard-grid">
         <div className="dashboard-main">
+          <DailyNoteComposer />
+
           {hasChecklist ? (
             <>
               <p className={dayComplete ? 'day-status day-status--complete celebration-banner' : 'day-status'}>

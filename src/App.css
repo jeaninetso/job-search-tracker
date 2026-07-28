@@ -276,6 +276,24 @@ button:disabled {
   font-weight: 700;
 }
 
+.daily-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.daily-note .field-label {
+  width: 100%;
+  margin: 0;
+}
+
+.daily-note input {
+  flex: 1;
+  min-width: 200px;
+}
+
 .day-status {
   color: var(--muted);
   margin-bottom: 1.5rem;
@@ -440,6 +458,38 @@ button:disabled {
 .feed-badge--done {
   color: var(--good);
   font-weight: 700;
+}
+
+.feed-post {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.feed-post-body {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.feed-reaction {
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.feed-reaction--active {
+  background: var(--sky);
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .avatar {

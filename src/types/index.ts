@@ -29,6 +29,23 @@ export interface UserBadge {
   last_earned_at: string;
 }
 
+export interface FeedPost {
+  id: string;
+  user_id: string;
+  for_date: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeedReaction {
+  id: string;
+  post_id: string;
+  from_user_id: string;
+  emoji: string;
+  created_at: string;
+}
+
 export interface GoalItem {
   id: string;
   user_id: string;

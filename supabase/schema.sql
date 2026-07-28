@@ -95,34 +95,88 @@ create policy "users manage their own daily progress"
 
 create index daily_progress_user_date_idx on public.daily_progress (user_id, entry_date);
 
+-- Feed posts and reactions ---------------------------------------------------------------
+-- A free-text daily note ("Interview at Google today") is what a prayer
+-- reaction actually attaches to - one per user per day.
+create table public.feed_posts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  for_date date not null default current_date,
+  body text not null check (char_length(body) between 1 and 280),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, for_date)
+);
+
+alter table public.feed_posts enable row level security;
+
+create policy "feed posts are readable by any authenticated user"
+  on public.feed_posts for select
+  to authenticated
+  using (true);
+
+create policy "users manage their own feed posts"
+  on public.feed_posts for all
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Emoji is constrained to just prayer-hands for now - widen this check
+-- constraint later if more reaction types are added.
+create table public.feed_reactions (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.feed_posts (id) on delete cascade,
+  from_user_id uuid not null references public.profiles (id) on delete cascade,
+  emoji text not null check (emoji in ('🙏')),
+  created_at timestamptz not null default now(),
+  unique (post_id, from_user_id, emoji)
+);
+
+alter table public.feed_reactions enable row level security;
+
+create policy "feed reactions are readable by any authenticated user"
+  on public.feed_reactions for select
+  to authenticated
+  using (true);
+
+create policy "users manage their own reactions"
+  on public.feed_reactions for all
+  to authenticated
+  using (auth.uid() = from_user_id)
+  with check (auth.uid() = from_user_id);
+
 -- XP and badges ---------------------------------------------------------------
 -- XP is a personal progress metric, not a leaderboard - The Group stays
 -- "visibility, not ranking." Amounts are baked into a check constraint so a
 -- client bug can't silently mis-award XP: +2 per checklist item completed,
--- +5 for finishing the whole day, +25/+100/+300 for a 7/30/100-day streak.
+-- +5 for finishing the whole day, +25/+100/+300 for a 7/30/100-day streak,
+-- +1 for giving a prayer reaction.
 create table public.xp_events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
   amount int not null check (amount > 0),
-  reason text not null check (reason in ('item_completed', 'day_complete', 'streak_milestone')),
+  reason text not null check (reason in ('item_completed', 'day_complete', 'streak_milestone', 'prayer_given')),
   goal_item_id uuid references public.goal_items (id) on delete cascade,
   streak_threshold int check (streak_threshold in (7, 30, 100)),
+  reaction_id uuid references public.feed_reactions (id) on delete cascade,
   for_date date not null default current_date,
   created_at timestamptz not null default now(),
   constraint xp_events_shape check (
-    (reason = 'item_completed' and goal_item_id is not null and streak_threshold is null and amount = 2)
-    or (reason = 'day_complete' and goal_item_id is null and streak_threshold is null and amount = 5)
+    (reason = 'item_completed' and goal_item_id is not null and streak_threshold is null and reaction_id is null and amount = 2)
+    or (reason = 'day_complete' and goal_item_id is null and streak_threshold is null and reaction_id is null and amount = 5)
     or (
-      reason = 'streak_milestone' and goal_item_id is null and streak_threshold is not null
+      reason = 'streak_milestone' and goal_item_id is null and streak_threshold is not null and reaction_id is null
       and amount = case streak_threshold when 7 then 25 when 30 then 100 when 100 then 300 end
     )
+    or (reason = 'prayer_given' and goal_item_id is null and streak_threshold is null and reaction_id is not null and amount = 1)
   )
 );
 
 -- One item-completion award per item per day; one day-complete bonus per
 -- day; one streak-milestone award per threshold per streak run (for_date
 -- differs the next time the same threshold is crossed after a reset, so
--- it's earnable again - badges are repeatable, matching user_badges below).
+-- it's earnable again - badges are repeatable, matching user_badges below);
+-- one XP event per reaction (deleting the reaction cascades this away too).
 create unique index xp_events_item_once_idx
   on public.xp_events (user_id, goal_item_id, for_date)
   where reason = 'item_completed';
@@ -130,6 +184,10 @@ create unique index xp_events_item_once_idx
 create unique index xp_events_day_once_idx
   on public.xp_events (user_id, for_date)
   where reason = 'day_complete';
+
+create unique index xp_events_reaction_once_idx
+  on public.xp_events (reaction_id)
+  where reason = 'prayer_given';
 
 create unique index xp_events_streak_once_idx
   on public.xp_events (user_id, for_date, streak_threshold)
