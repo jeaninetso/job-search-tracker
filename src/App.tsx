@@ -7,6 +7,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Profile } from './pages/Profile';
 import { Avatar } from './components/Avatar';
 import { StreakBadge } from './components/StreakBadge';
+import { XpBadge } from './components/XpBadge';
 import './App.css';
 
 function Gate({ children }: { children: React.ReactNode }) {
@@ -28,6 +29,7 @@ function Nav() {
         <Link to="/">Job Search Tracker</Link>
       </div>
       <div className="nav-right">
+        <XpBadge />
         <StreakBadge />
         <Link to="/profile" className="nav-profile">
           <Avatar name={profile.display_name} avatarKey={profile.avatar_key} seed={profile.id} size={28} />

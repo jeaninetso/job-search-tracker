@@ -1,105 +1,16 @@
--- Job Search Tracker schema
--- Run this in the Supabase SQL editor (Project > SQL Editor > New query)
--- Single shared group: everyone who signs up via the invite link is in the same group.
-
--- Profiles ---------------------------------------------------------------
-create table public.profiles (
-  id uuid primary key references auth.users (id) on delete cascade,
-  display_name text not null,
-  avatar_key text,
-  bio text check (bio is null or char_length(bio) <= 280),
-  status text,
-  total_xp int not null default 0,
-  created_at timestamptz not null default now()
-);
-
-alter table public.profiles enable row level security;
-
-create policy "profiles are readable by any authenticated user"
-  on public.profiles for select
-  to authenticated
-  using (true);
-
-create policy "users can insert their own profile"
-  on public.profiles for insert
-  to authenticated
-  with check (auth.uid() = id);
-
-create policy "users can update their own profile"
-  on public.profiles for update
-  to authenticated
-  using (auth.uid() = id);
-
--- Goal items ---------------------------------------------------------------
--- Each row is one checklist item for one specific calendar date (for_date).
--- Every day is fully independent - editing/deleting a goal only ever
--- affects that date's row. A new day with nothing set up yet gets
--- auto-copied forward from the user's most recent day that has items
--- (see src/lib/carryForward.ts) rather than starting from a shared
--- recurring template.
--- Items sharing the same group_id are an OR condition: the group counts as
--- "done" for the day if ANY item in the group is satisfied. A goal with no
--- OR partner is simply the sole member of its own group.
-create table public.goal_items (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles (id) on delete cascade,
-  group_id uuid not null default gen_random_uuid(),
-  label text not null,
-  kind text not null check (kind in ('count', 'boolean')),
-  target int check (kind != 'count' or target > 0),
-  sort_order int not null default 0,
-  for_date date not null default current_date,
-  created_at timestamptz not null default now()
-);
-
-alter table public.goal_items enable row level security;
-
-create policy "goal items are readable by any authenticated user"
-  on public.goal_items for select
-  to authenticated
-  using (true);
-
-create policy "users manage their own goal items"
-  on public.goal_items for all
-  to authenticated
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
--- Daily progress ---------------------------------------------------------------
--- One row per user, per day, per goal item. Upserted as the user logs
--- through the day (count items increment current_value, boolean items flip
--- current_done).
-create table public.daily_progress (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles (id) on delete cascade,
-  goal_item_id uuid not null references public.goal_items (id) on delete cascade,
-  entry_date date not null default current_date,
-  current_value int not null default 0,
-  current_done boolean not null default false,
-  updated_at timestamptz not null default now(),
-  unique (user_id, goal_item_id, entry_date)
-);
-
-alter table public.daily_progress enable row level security;
-
-create policy "daily progress is readable by any authenticated user"
-  on public.daily_progress for select
-  to authenticated
-  using (true);
-
-create policy "users manage their own daily progress"
-  on public.daily_progress for all
-  to authenticated
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-create index daily_progress_user_date_idx on public.daily_progress (user_id, entry_date);
-
--- XP and badges ---------------------------------------------------------------
+-- Adds an XP/badges layer on top of the existing checklist + streak system.
 -- XP is a personal progress metric, not a leaderboard - The Group stays
 -- "visibility, not ranking." Amounts are baked into a check constraint so a
 -- client bug can't silently mis-award XP: +2 per checklist item completed,
 -- +5 for finishing the whole day, +25/+100/+300 for a 7/30/100-day streak.
+
+alter table public.profiles
+  add column if not exists total_xp int not null default 0;
+
+-- Ledger of every XP award. Kept (not just a running total) so awards are
+-- idempotent - toggling a checkbox on/off can't be farmed for repeat XP,
+-- since re-awarding the same (user, item, date) hits the partial unique
+-- index below and is rejected rather than silently duplicated.
 create table public.xp_events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,
@@ -173,7 +84,8 @@ create trigger xp_events_bump_total
   after insert or delete on public.xp_events
   for each row execute function public.bump_total_xp();
 
--- Badges are seeded, not user-writable. Repeatable (times_earned) rather
+-- Badges ---------------------------------------------------------------
+-- Catalog is seeded, not user-writable. Repeatable (times_earned) rather
 -- than one-row-per-earn, matching Stridekick's "earn more than once,
 -- tracked as a count" model.
 create table public.badges (

@@ -6,7 +6,27 @@ export interface Profile {
   avatar_key: string | null;
   bio: string | null;
   status: string | null;
+  total_xp: number;
   created_at: string;
+}
+
+export type BadgeCategory = 'streak' | 'challenge' | 'social';
+
+export interface Badge {
+  id: string;
+  key: string;
+  label: string;
+  description: string;
+  emoji: string;
+  category: BadgeCategory;
+}
+
+export interface UserBadge {
+  user_id: string;
+  badge_id: string;
+  times_earned: number;
+  first_earned_at: string;
+  last_earned_at: string;
 }
 
 export interface GoalItem {

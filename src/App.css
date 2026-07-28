@@ -196,6 +196,14 @@ h2 {
   white-space: nowrap;
 }
 
+.xp-badge {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--good);
+  white-space: nowrap;
+}
+
 .auth-card {
   max-width: 380px;
   margin: 4rem auto;

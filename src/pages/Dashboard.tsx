@@ -3,6 +3,14 @@ import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
+import { computeStreak } from '../lib/streak';
+import {
+  awardDayCompleteXp,
+  awardItemCompletionXp,
+  checkStreakMilestone,
+  retractDayCompleteXp,
+  retractItemCompletionXp,
+} from '../lib/xp';
 import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
 import { ManageChecklist } from '../components/ManageChecklist';
@@ -12,7 +20,7 @@ import { ensureTodayGoals } from '../lib/carryForward';
 import type { DailyProgress, GoalItem } from '../types';
 
 export function Dashboard() {
-  const { session, profile } = useAuth();
+  const { session, profile, refreshProfile } = useAuth();
   const [items, setItems] = useState<GoalItem[]>([]);
   const [history, setHistory] = useState<DailyProgress[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,20 +95,39 @@ export function Dashboard() {
 
   const groups = useMemo(() => evaluateGroups(todayItems, progressByItemId), [todayItems, progressByItemId]);
   const dayComplete = isDayComplete(groups);
+  const streak = useMemo(() => computeStreak(items, history, new Date()), [items, history]);
 
-  // Fire confetti only on the moment completion flips true, not on every
-  // render/mount where it was already complete from an earlier session.
+  // Fire confetti + award the day-complete XP bonus only on the moment
+  // completion flips true (not on every render/mount where it was already
+  // complete from an earlier session); retract the bonus on the reverse
+  // flip, e.g. unchecking something after finishing.
   useEffect(() => {
-    if (wasCompleteRef.current === false && dayComplete) {
+    const wasComplete = wasCompleteRef.current;
+    wasCompleteRef.current = dayComplete;
+    if (!session) return;
+
+    if (wasComplete === false && dayComplete) {
       setCelebrating(true);
       const timeout = setTimeout(() => setCelebrating(false), 2200);
+      awardDayCompleteXp(session.user.id, todayKey()).then(refreshProfile);
       return () => clearTimeout(timeout);
     }
-    wasCompleteRef.current = dayComplete;
+    if (wasComplete === true && !dayComplete) {
+      retractDayCompleteXp(session.user.id, todayKey()).then(refreshProfile);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dayComplete]);
 
-  const upsertProgress = async (item: GoalItem, next: Partial<DailyProgress>) => {
-    if (!session || savingItemIds.has(item.id)) return;
+  // Awards streak-milestone XP + badge the moment the streak crosses
+  // 7/30/100 - a no-op for every other streak length.
+  useEffect(() => {
+    if (!session) return;
+    checkStreakMilestone(session.user.id, streak, todayKey()).then(refreshProfile);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, streak]);
+
+  const upsertProgress = async (item: GoalItem, next: Partial<DailyProgress>): Promise<boolean> => {
+    if (!session || savingItemIds.has(item.id)) return false;
     setError(null);
     setSavingItemIds((prev) => new Set(prev).add(item.id));
 
@@ -130,22 +157,37 @@ export function Dashboard() {
 
     if (upsertError) {
       setError(`Couldn't save "${item.label}" — try again.`);
-      return;
+      return false;
     }
     if (data) {
       setHistory((prev) => [...prev.filter((row) => row.id !== data.id), data]);
     }
+    return true;
   };
 
-  const toggleBoolean = (item: GoalItem) => {
+  const toggleBoolean = async (item: GoalItem) => {
     const existing = progressByItemId.get(item.id);
-    upsertProgress(item, { current_done: !(existing?.current_done ?? false) });
+    const nextDone = !(existing?.current_done ?? false);
+    const ok = await upsertProgress(item, { current_done: nextDone });
+    if (!ok || !session) return;
+
+    if (nextDone) await awardItemCompletionXp(session.user.id, item.id, todayKey());
+    else await retractItemCompletionXp(session.user.id, item.id, todayKey());
+    await refreshProfile();
   };
 
-  const incrementCount = (item: GoalItem, delta: number) => {
+  const incrementCount = async (item: GoalItem, delta: number) => {
     const existing = progressByItemId.get(item.id);
-    const next = Math.max(0, (existing?.current_value ?? 0) + delta);
-    upsertProgress(item, { current_value: next });
+    const prevValue = existing?.current_value ?? 0;
+    const nextValue = Math.max(0, prevValue + delta);
+    const ok = await upsertProgress(item, { current_value: nextValue });
+    if (!ok || !session || item.target == null) return;
+
+    const wasMet = prevValue >= item.target;
+    const nowMet = nextValue >= item.target;
+    if (!wasMet && nowMet) await awardItemCompletionXp(session.user.id, item.id, todayKey());
+    else if (wasMet && !nowMet) await retractItemCompletionXp(session.user.id, item.id, todayKey());
+    if (wasMet !== nowMet) await refreshProfile();
   };
 
   if (loading) return <p>Loading...</p>;
