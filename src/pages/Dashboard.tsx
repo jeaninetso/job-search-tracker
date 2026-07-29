@@ -109,11 +109,15 @@ export function Dashboard() {
     if (wasComplete === false && dayComplete) {
       setCelebrating(true);
       const timeout = setTimeout(() => setCelebrating(false), 2200);
-      awardDayCompleteXp(session.user.id, todayKey()).then(refreshProfile);
+      awardDayCompleteXp(session.user.id, todayKey())
+        .then(refreshProfile)
+        .catch((err) => console.error('Failed to award day-complete XP:', err));
       return () => clearTimeout(timeout);
     }
     if (wasComplete === true && !dayComplete) {
-      retractDayCompleteXp(session.user.id, todayKey()).then(refreshProfile);
+      retractDayCompleteXp(session.user.id, todayKey())
+        .then(refreshProfile)
+        .catch((err) => console.error('Failed to retract day-complete XP:', err));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dayComplete]);
@@ -122,7 +126,9 @@ export function Dashboard() {
   // 7/30/100 - a no-op for every other streak length.
   useEffect(() => {
     if (!session) return;
-    checkStreakMilestone(session.user.id, streak, todayKey()).then(refreshProfile);
+    checkStreakMilestone(session.user.id, streak, todayKey())
+      .then(refreshProfile)
+      .catch((err) => console.error('Failed to check streak milestone:', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, streak]);
 
@@ -171,9 +177,13 @@ export function Dashboard() {
     const ok = await upsertProgress(item, { current_done: nextDone });
     if (!ok || !session) return;
 
-    if (nextDone) await awardItemCompletionXp(session.user.id, item.id, todayKey());
-    else await retractItemCompletionXp(session.user.id, item.id, todayKey());
-    await refreshProfile();
+    try {
+      if (nextDone) await awardItemCompletionXp(session.user.id, item.id, todayKey());
+      else await retractItemCompletionXp(session.user.id, item.id, todayKey());
+      await refreshProfile();
+    } catch (err) {
+      console.error('Failed to update XP for item completion:', err);
+    }
   };
 
   const incrementCount = async (item: GoalItem, delta: number) => {
@@ -185,9 +195,13 @@ export function Dashboard() {
 
     const wasMet = prevValue >= item.target;
     const nowMet = nextValue >= item.target;
-    if (!wasMet && nowMet) await awardItemCompletionXp(session.user.id, item.id, todayKey());
-    else if (wasMet && !nowMet) await retractItemCompletionXp(session.user.id, item.id, todayKey());
-    if (wasMet !== nowMet) await refreshProfile();
+    try {
+      if (!wasMet && nowMet) await awardItemCompletionXp(session.user.id, item.id, todayKey());
+      else if (wasMet && !nowMet) await retractItemCompletionXp(session.user.id, item.id, todayKey());
+      if (wasMet !== nowMet) await refreshProfile();
+    } catch (err) {
+      console.error('Failed to update XP for count item:', err);
+    }
   };
 
   if (loading) return <Spinner />;

@@ -16,6 +16,7 @@ export function DailyNoteComposer({ onSaved }: DailyNoteComposerProps) {
   const [savedBody, setSavedBody] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -35,16 +36,22 @@ export function DailyNoteComposer({ onSaved }: DailyNoteComposerProps) {
   const save = async () => {
     if (!session || saving) return;
     setSaving(true);
-    if (body.trim()) {
-      await upsertTodayPost(session.user.id, body);
-      setSavedBody(body.trim());
-    } else {
-      await deleteTodayPost(session.user.id);
-      setSavedBody(null);
+    setError(null);
+    try {
+      if (body.trim()) {
+        await upsertTodayPost(session.user.id, body);
+        setSavedBody(body.trim());
+      } else {
+        await deleteTodayPost(session.user.id);
+        setSavedBody(null);
+      }
+      setEditing(false);
+      onSaved?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save that - try again.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setEditing(false);
-    onSaved?.();
   };
 
   // Once posted, show the actual saved text right here - it also shows up
@@ -91,6 +98,7 @@ export function DailyNoteComposer({ onSaved }: DailyNoteComposerProps) {
           Cancel
         </button>
       )}
+      {error && <p className="error">{error}</p>}
     </div>
   );
 }

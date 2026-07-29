@@ -20,6 +20,7 @@ export function PostFeed() {
   const [entries, setEntries] = useState<FeedEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [reacting, setReacting] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     const [{ data: posts }, { data: profiles }] = await Promise.all([
@@ -65,19 +66,26 @@ export function PostFeed() {
   const togglePrayer = async (post: FeedPost, alreadyReacted: boolean) => {
     if (!session || reacting.has(post.id)) return;
     setReacting((prev) => new Set(prev).add(post.id));
-    if (alreadyReacted) await removePrayerReaction(post.id, session.user.id);
-    else await addPrayerReaction(post.id, session.user.id);
-    await load();
-    setReacting((prev) => {
-      const copy = new Set(prev);
-      copy.delete(post.id);
-      return copy;
-    });
+    setError(null);
+    try {
+      if (alreadyReacted) await removePrayerReaction(post.id, session.user.id);
+      else await addPrayerReaction(post.id, session.user.id);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't react to that - try again.");
+    } finally {
+      setReacting((prev) => {
+        const copy = new Set(prev);
+        copy.delete(post.id);
+        return copy;
+      });
+    }
   };
 
   return (
     <div className="post-feed">
       <DailyNoteComposer onSaved={load} />
+      {error && <p className="error">{error}</p>}
 
       {loading ? (
         <Spinner />

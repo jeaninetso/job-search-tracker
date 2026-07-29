@@ -50,44 +50,49 @@ function Nav() {
 }
 
 function AppRoutes() {
+  const location = useLocation();
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route
-        path="/"
-        element={
-          <Gate>
-            <Dashboard />
-          </Gate>
-        }
-      />
-      <Route path="/goals" element={<Navigate to="/" replace />} />
-      <Route path="/feed" element={<Navigate to="/group" replace />} />
-      <Route
-        path="/group"
-        element={
-          <Gate>
-            <Group />
-          </Gate>
-        }
-      />
-      <Route
-        path="/challenges"
-        element={
-          <Gate>
-            <Challenges />
-          </Gate>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <Gate>
-            <Profile />
-          </Gate>
-        }
-      />
-    </Routes>
+    // Re-keying on pathname retriggers the route-fade animation on every
+    // navigation - a clearer "something happened" cue than the top bar alone.
+    <div key={location.pathname} className="route-fade">
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <Gate>
+              <Dashboard />
+            </Gate>
+          }
+        />
+        <Route path="/goals" element={<Navigate to="/" replace />} />
+        <Route path="/feed" element={<Navigate to="/group" replace />} />
+        <Route
+          path="/group"
+          element={
+            <Gate>
+              <Group />
+            </Gate>
+          }
+        />
+        <Route
+          path="/challenges"
+          element={
+            <Gate>
+              <Challenges />
+            </Gate>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <Gate>
+              <Profile />
+            </Gate>
+          }
+        />
+      </Routes>
+    </div>
   );
 }
 

@@ -128,14 +128,21 @@ function ChallengeCard({
   onSubmitted: () => Promise<void>;
 }) {
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const ended = !!challenge.end_date && challenge.end_date < todayKey();
 
   const handleSubmit = async (categoryId: string, goalItemId: string, amount: number) => {
     if (!myUserId || submittingId) return;
     setSubmittingId(goalItemId);
-    await submitToCategory(categoryId, myUserId, goalItemId, amount);
-    await onSubmitted();
-    setSubmittingId(null);
+    setError(null);
+    try {
+      await submitToCategory(categoryId, myUserId, goalItemId, amount);
+      await onSubmitted();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong logging that - try again.');
+    } finally {
+      setSubmittingId(null);
+    }
   };
 
   return (
@@ -220,6 +227,7 @@ function ChallengeCard({
           </div>
         );
       })}
+      {error && <p className="error">{error}</p>}
     </div>
   );
 }
@@ -231,6 +239,7 @@ function CreateChallengeForm({ userId, onCreated }: { userId: string; onCreated:
   const [displayMode, setDisplayMode] = useState<'individual' | 'aggregate'>('aggregate');
   const [categoryRows, setCategoryRows] = useState([{ label: '', target: 10 }]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const updateRow = (i: number, patch: Partial<{ label: string; target: number }>) => {
     setCategoryRows((prev) => prev.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
@@ -242,21 +251,27 @@ function CreateChallengeForm({ userId, onCreated }: { userId: string; onCreated:
     e.preventDefault();
     if (!title.trim() || saving) return;
     setSaving(true);
-    await createChallenge(
-      userId,
-      title,
-      description,
-      endDate || null,
-      displayMode,
-      categoryRows.map((row) => ({ label: row.label, targetCount: row.target }))
-    );
-    setTitle('');
-    setDescription('');
-    setEndDate('');
-    setDisplayMode('aggregate');
-    setCategoryRows([{ label: '', target: 10 }]);
-    setSaving(false);
-    await onCreated();
+    setError(null);
+    try {
+      await createChallenge(
+        userId,
+        title,
+        description,
+        endDate || null,
+        displayMode,
+        categoryRows.map((row) => ({ label: row.label, targetCount: row.target }))
+      );
+      setTitle('');
+      setDescription('');
+      setEndDate('');
+      setDisplayMode('aggregate');
+      setCategoryRows([{ label: '', target: 10 }]);
+      await onCreated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong creating that challenge - try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -312,6 +327,7 @@ function CreateChallengeForm({ userId, onCreated }: { userId: string; onCreated:
       <button type="submit" disabled={saving || !title.trim()}>
         {saving ? 'Creating...' : 'Create challenge'}
       </button>
+      {error && <p className="error">{error}</p>}
     </form>
   );
 }

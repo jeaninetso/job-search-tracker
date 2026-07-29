@@ -69,7 +69,12 @@ export function ManageChecklist({ onChange }: ManageChecklistProps) {
   // already copied forward from today, or copied from before) are
   // untouched, since each date's items are independent.
   const removeItem = async (id: string) => {
-    await supabase.from('goal_items').delete().eq('id', id);
+    setError(null);
+    const { error: deleteError } = await supabase.from('goal_items').delete().eq('id', id);
+    if (deleteError) {
+      setError(deleteError.message);
+      return;
+    }
     await load();
     onChange();
   };
@@ -152,11 +157,13 @@ function AddAlternative({
   const [label, setLabel] = useState('');
   const [kind, setKind] = useState<GoalKind>('boolean');
   const [target, setTarget] = useState(5);
+  const [error, setError] = useState<string | null>(null);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!session) return;
-    await supabase.from('goal_items').insert({
+    setError(null);
+    const { error: insertError } = await supabase.from('goal_items').insert({
       user_id: session.user.id,
       group_id: groupId,
       label: label.trim(),
@@ -165,6 +172,10 @@ function AddAlternative({
       for_date: todayKey(),
       sort_order: nextSort,
     });
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
     setLabel('');
     setOpen(false);
     onAdded();
@@ -204,6 +215,7 @@ function AddAlternative({
       <button type="button" onClick={() => setOpen(false)}>
         Cancel
       </button>
+      {error && <p className="error">{error}</p>}
     </form>
   );
 }
