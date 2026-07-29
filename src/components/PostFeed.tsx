@@ -4,6 +4,7 @@ import { useAuth } from '../lib/AuthContext';
 import { addPrayerReaction, removePrayerReaction, PRAYER_EMOJI } from '../lib/reactions';
 import { Avatar } from './Avatar';
 import { DailyNoteComposer } from './DailyNoteComposer';
+import { Spinner } from './Spinner';
 import { todayKey } from '../lib/date';
 import type { FeedPost, FeedReaction, Profile } from '../types';
 
@@ -79,7 +80,7 @@ export function PostFeed() {
       <DailyNoteComposer onSaved={load} />
 
       {loading ? (
-        <p>Loading...</p>
+        <Spinner />
       ) : entries.length === 0 ? (
         <p className="hint">No notes yet today - be the first to share something.</p>
       ) : (

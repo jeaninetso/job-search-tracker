@@ -14,6 +14,7 @@ import {
 import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
 import { ManageChecklist } from '../components/ManageChecklist';
+import { Spinner } from '../components/Spinner';
 import { todayKey } from '../lib/date';
 import { ensureTodayGoals } from '../lib/carryForward';
 import type { DailyProgress, GoalItem } from '../types';
@@ -189,7 +190,7 @@ export function Dashboard() {
     if (wasMet !== nowMet) await refreshProfile();
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Spinner />;
 
   const hasChecklist = groups.length > 0;
 

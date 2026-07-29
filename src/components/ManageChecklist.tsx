@@ -4,6 +4,7 @@ import { useAuth } from '../lib/AuthContext';
 import { groupGoalItems } from '../lib/goals';
 import { todayKey } from '../lib/date';
 import { ensureTodayGoals } from '../lib/carryForward';
+import { Spinner } from './Spinner';
 import type { GoalItem, GoalKind } from '../types';
 
 interface ManageChecklistProps {
@@ -73,7 +74,7 @@ export function ManageChecklist({ onChange }: ManageChecklistProps) {
     onChange();
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Spinner />;
 
   const groups = groupGoalItems(items);
 

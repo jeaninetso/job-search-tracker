@@ -30,6 +30,15 @@ create policy "users can update their own profile"
   to authenticated
   using (auth.uid() = id);
 
+-- Deleting a profile cascades away everything else the user owns via the
+-- FK "on delete cascade" clauses on every table below - this does NOT
+-- delete the underlying Supabase Auth user, which needs a service-role
+-- (Edge Function) delete or manual removal in the Supabase dashboard.
+create policy "users can delete their own profile"
+  on public.profiles for delete
+  to authenticated
+  using (auth.uid() = id);
+
 -- Goal items ---------------------------------------------------------------
 -- Each row is one checklist item for one specific calendar date (for_date).
 -- Every day is fully independent - editing/deleting a goal only ever

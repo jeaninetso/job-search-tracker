@@ -3,6 +3,7 @@ import { formatISO } from 'date-fns';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { Avatar } from '../components/Avatar';
+import { Spinner } from '../components/Spinner';
 import { todayKey } from '../lib/date';
 import {
   computeCategoryProgress,
@@ -73,7 +74,7 @@ export function Challenges() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Spinner />;
 
   return (
     <div className="page">

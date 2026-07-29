@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/AuthContext';
 import { Avatar } from '../components/Avatar';
+import { BadgeGrid } from '../components/BadgeGrid';
 import { AVATAR_PRESETS, STATUS_PRESETS, getAvatarPreset } from '../lib/presets';
 
 export function Profile() {
@@ -127,6 +128,59 @@ export function Profile() {
         </div>
         {error && <p className="error">{error}</p>}
       </form>
+
+      <h2>Badges</h2>
+      <BadgeGrid userId={profile.id} />
+
+      <DeleteAccountSection userId={profile.id} />
+    </div>
+  );
+}
+
+function DeleteAccountSection({ userId }: { userId: string }) {
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (confirmText !== 'DELETE' || deleting) return;
+    setDeleting(true);
+    setError(null);
+    const { error: deleteError } = await supabase.from('profiles').delete().eq('id', userId);
+    if (deleteError) {
+      setError(deleteError.message);
+      setDeleting(false);
+      return;
+    }
+    // AuthContext's onAuthStateChange listener picks up the sign-out and
+    // Gate redirects to /login on its own.
+    await supabase.auth.signOut();
+  };
+
+  return (
+    <div className="danger-zone">
+      <h2>Danger zone</h2>
+      <p className="hint">
+        Permanently deletes your checklist history, streaks, XP, badges, posts, and any challenges you
+        created. This can't be undone. Your login itself isn't removed - if you come back, you'll start
+        fresh with a new profile.
+      </p>
+      <div className="danger-zone-confirm">
+        <input
+          placeholder='Type "DELETE" to confirm'
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+        />
+        <button
+          type="button"
+          className="danger-button"
+          disabled={confirmText !== 'DELETE' || deleting}
+          onClick={handleDelete}
+        >
+          {deleting ? 'Deleting...' : 'Delete my account'}
+        </button>
+      </div>
+      {error && <p className="error">{error}</p>}
     </div>
   );
 }

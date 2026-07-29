@@ -5,6 +5,7 @@ import { useAuth } from '../lib/AuthContext';
 import { evaluateGroups, isDayComplete } from '../lib/goals';
 import { computeStreak, getStreakFlames } from '../lib/streak';
 import { Avatar } from './Avatar';
+import { Spinner } from './Spinner';
 import { getStatusLabel } from '../lib/presets';
 import { todayKey } from '../lib/date';
 import type { DailyProgress, GoalItem, Profile } from '../types';
@@ -79,7 +80,7 @@ export function GroupStats() {
 
   const sorted = useMemo(() => members, [members]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Spinner />;
 
   return (
     <div className="feed-list">

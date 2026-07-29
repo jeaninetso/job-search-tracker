@@ -10,13 +10,15 @@ import { Profile } from './pages/Profile';
 import { Avatar } from './components/Avatar';
 import { StreakBadge } from './components/StreakBadge';
 import { XpBadge } from './components/XpBadge';
+import { RouteProgress } from './components/RouteProgress';
+import { Spinner } from './components/Spinner';
 import './App.css';
 
 function Gate({ children }: { children: React.ReactNode }) {
   const { session, profile, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <p className="page">Loading...</p>;
+  if (loading) return <div className="page"><Spinner /></div>;
   if (!session) return <Navigate to="/login" replace state={{ from: location }} />;
   if (!profile) return <ProfileSetup />;
   return <>{children}</>;
@@ -93,6 +95,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <RouteProgress />
         <Nav />
         <AppRoutes />
       </AuthProvider>
