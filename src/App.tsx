@@ -5,6 +5,7 @@ import { Login } from './pages/Login';
 import { ProfileSetup } from './pages/ProfileSetup';
 import { Dashboard } from './pages/Dashboard';
 import { Group } from './pages/Group';
+import { Challenges } from './pages/Challenges';
 import { Profile } from './pages/Profile';
 import { Avatar } from './components/Avatar';
 import { StreakBadge } from './components/StreakBadge';
@@ -29,6 +30,7 @@ function Nav() {
       <div className="nav-links">
         <Link to="/">Job Search Tracker</Link>
         <Link to="/group">The Group</Link>
+        <Link to="/challenges">Challenges</Link>
       </div>
       <div className="nav-right">
         <XpBadge />
@@ -64,6 +66,14 @@ function AppRoutes() {
         element={
           <Gate>
             <Group />
+          </Gate>
+        }
+      />
+      <Route
+        path="/challenges"
+        element={
+          <Gate>
+            <Challenges />
           </Gate>
         }
       />

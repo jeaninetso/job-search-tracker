@@ -74,3 +74,32 @@ export interface GoalGroupStatus {
   items: GoalItem[];
   satisfied: boolean;
 }
+
+export type ChallengeDisplayMode = 'individual' | 'aggregate';
+
+export interface Challenge {
+  id: string;
+  created_by: string;
+  title: string;
+  description: string | null;
+  start_date: string;
+  end_date: string | null;
+  display_mode: ChallengeDisplayMode;
+  created_at: string;
+}
+
+export interface ChallengeCategory {
+  id: string;
+  challenge_id: string;
+  label: string;
+  target_count: number;
+}
+
+export interface ChallengeSubmission {
+  id: string;
+  category_id: string;
+  user_id: string;
+  goal_item_id: string;
+  amount: number;
+  submitted_at: string;
+}
