@@ -86,8 +86,14 @@ export function GroupFeed() {
       };
     });
 
-    // Highest streak first, but this is just for readability - not a ranked leaderboard.
-    statuses.sort((a, b) => b.streak - a.streak);
+    // Your own card always comes first - easy to find right after posting
+    // a note - then highest streak, but that ordering is just for
+    // readability, not a ranked leaderboard.
+    statuses.sort((a, b) => {
+      if (a.profile.id === session?.user.id) return -1;
+      if (b.profile.id === session?.user.id) return 1;
+      return b.streak - a.streak;
+    });
     setMembers(statuses);
     setLoading(false);
   };
@@ -118,12 +124,16 @@ export function GroupFeed() {
     <div className="feed-list">
       {sorted.map(({ profile, streak, dayComplete, hasGoals, post, reactions }) => {
         const iReacted = !!session && reactions.some((r) => r.from_user_id === session.user.id);
+        const isMe = profile.id === session?.user.id;
         return (
-          <div className="feed-card" key={profile.id}>
+          <div className={isMe ? 'feed-card feed-card--me' : 'feed-card'} key={profile.id}>
             <div className="feed-identity">
               <Avatar name={profile.display_name} avatarKey={profile.avatar_key} seed={profile.id} size={32} />
               <div className="feed-name-block">
-                <span className="feed-name">{profile.display_name}</span>
+                <span className="feed-name">
+                  {profile.display_name}
+                  {isMe ? ' (you)' : ''}
+                </span>
                 {getStatusLabel(profile.status) && (
                   <span className="feed-status">{getStatusLabel(profile.status)}</span>
                 )}

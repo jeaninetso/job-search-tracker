@@ -294,6 +294,23 @@ button:disabled {
   min-width: 200px;
 }
 
+.daily-note--posted {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  justify-content: space-between;
+}
+
+.daily-note-posted {
+  margin: 0;
+}
+
+.daily-note-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .day-status {
   color: var(--muted);
   margin-bottom: 1.5rem;
@@ -432,6 +449,11 @@ button:disabled {
   padding: 0.6rem 0.75rem;
   border-radius: 10px;
   border: 1px solid var(--border);
+}
+
+.feed-card--me {
+  border-color: var(--accent);
+  background: var(--card);
 }
 
 .feed-name {

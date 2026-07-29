@@ -8,7 +8,8 @@ import { todayKey } from '../lib/date';
 export function DailyNoteComposer() {
   const { session } = useAuth();
   const [body, setBody] = useState('');
-  const [savedBody, setSavedBody] = useState('');
+  const [savedBody, setSavedBody] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -21,7 +22,8 @@ export function DailyNoteComposer() {
       .maybeSingle()
       .then(({ data }) => {
         setBody(data?.body ?? '');
-        setSavedBody(data?.body ?? '');
+        setSavedBody(data?.body ?? null);
+        setEditing(!data?.body);
       });
   }, [session]);
 
@@ -33,10 +35,35 @@ export function DailyNoteComposer() {
       setSavedBody(body.trim());
     } else {
       await deleteTodayPost(session.user.id);
-      setSavedBody('');
+      setSavedBody(null);
     }
     setSaving(false);
+    setEditing(false);
   };
+
+  // Once posted, show the actual saved text right here - it also shows up
+  // in The Group sidebar, but that shouldn't be the only place you can
+  // confirm what you posted.
+  if (!editing && savedBody) {
+    return (
+      <div className="daily-note daily-note--posted">
+        <p className="daily-note-posted">
+          <span className="daily-note-label">Posted to the group:</span> "{savedBody}"
+        </p>
+        <button
+          className="link-button"
+          onClick={() => {
+            setBody(savedBody);
+            setEditing(true);
+          }}
+        >
+          Edit
+        </button>
+      </div>
+    );
+  }
+
+  const isDirty = body.trim() !== (savedBody ?? '');
 
   return (
     <div className="daily-note">
@@ -50,9 +77,14 @@ export function DailyNoteComposer() {
         value={body}
         onChange={(e) => setBody(e.target.value)}
       />
-      <button disabled={saving || body.trim() === savedBody} onClick={save}>
-        {saving ? 'Saving...' : 'Post'}
+      <button disabled={saving || !isDirty} onClick={save}>
+        {saving ? 'Saving...' : body.trim() ? 'Post' : 'Remove'}
       </button>
+      {savedBody && (
+        <button className="link-button" onClick={() => setEditing(false)}>
+          Cancel
+        </button>
+      )}
     </div>
   );
 }
