@@ -90,7 +90,7 @@ h2 {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--sky);
+  background: var(--text);
 }
 
 .nav-links {
@@ -107,7 +107,7 @@ h2 {
 
 .nav a {
   position: relative;
-  color: var(--text);
+  color: var(--card);
   text-decoration: none;
   font-weight: 700;
   font-family: var(--font-display);
@@ -122,12 +122,12 @@ h2 {
   bottom: -2px;
   width: 0;
   height: 2px;
-  background: var(--accent);
+  background: var(--accent-soft);
   transition: width 0.2s ease;
 }
 
 .nav-links a:hover {
-  color: var(--accent);
+  color: var(--accent-soft);
   transform: translateY(-1px);
 }
 
@@ -145,7 +145,7 @@ h2 {
 }
 
 .nav-profile:hover {
-  background: var(--sky);
+  background: rgba(255, 255, 255, 0.14);
   transform: translateY(-1px);
 }
 
@@ -188,20 +188,23 @@ h2 {
   }
 }
 
-.streak-badge {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--accent);
-  white-space: nowrap;
-}
-
+.streak-badge,
 .xp-badge {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1rem;
-  color: var(--good);
+  font-size: 0.9rem;
+  color: var(--card);
   white-space: nowrap;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
+.streak-badge {
+  background: var(--accent);
+}
+
+.xp-badge {
+  background: var(--good);
 }
 
 .auth-card {
@@ -239,6 +242,7 @@ button {
   cursor: pointer;
   background: var(--accent);
   border: none;
+  border-radius: 999px;
   color: var(--accent-contrast);
   font-weight: 700;
   font-family: var(--font-display);
