@@ -4,8 +4,13 @@ import { useAuth } from '../lib/AuthContext';
 import { upsertTodayPost, deleteTodayPost } from '../lib/feedPosts';
 import { todayKey } from '../lib/date';
 
+interface DailyNoteComposerProps {
+  /** Called after a successful post/edit/remove, so a parent feed list can refresh. */
+  onSaved?: () => void;
+}
+
 /** Optional free-text note shown in The Group feed - what a prayer reaction actually attaches to. */
-export function DailyNoteComposer() {
+export function DailyNoteComposer({ onSaved }: DailyNoteComposerProps) {
   const { session } = useAuth();
   const [body, setBody] = useState('');
   const [savedBody, setSavedBody] = useState<string | null>(null);
@@ -39,6 +44,7 @@ export function DailyNoteComposer() {
     }
     setSaving(false);
     setEditing(false);
+    onSaved?.();
   };
 
   // Once posted, show the actual saved text right here - it also shows up

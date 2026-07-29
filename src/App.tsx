@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase';
 import { Login } from './pages/Login';
 import { ProfileSetup } from './pages/ProfileSetup';
 import { Dashboard } from './pages/Dashboard';
+import { Group } from './pages/Group';
 import { Profile } from './pages/Profile';
 import { Avatar } from './components/Avatar';
 import { StreakBadge } from './components/StreakBadge';
@@ -27,6 +28,7 @@ function Nav() {
     <nav className="nav">
       <div className="nav-links">
         <Link to="/">Job Search Tracker</Link>
+        <Link to="/group">The Group</Link>
       </div>
       <div className="nav-right">
         <XpBadge />
@@ -56,7 +58,15 @@ function AppRoutes() {
         }
       />
       <Route path="/goals" element={<Navigate to="/" replace />} />
-      <Route path="/feed" element={<Navigate to="/" replace />} />
+      <Route path="/feed" element={<Navigate to="/group" replace />} />
+      <Route
+        path="/group"
+        element={
+          <Gate>
+            <Group />
+          </Gate>
+        }
+      />
       <Route
         path="/profile"
         element={

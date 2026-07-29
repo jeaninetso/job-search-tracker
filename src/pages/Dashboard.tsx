@@ -14,8 +14,6 @@ import {
 import { Avatar } from '../components/Avatar';
 import { Confetti } from '../components/Confetti';
 import { ManageChecklist } from '../components/ManageChecklist';
-import { GroupFeed } from '../components/GroupFeed';
-import { DailyNoteComposer } from '../components/DailyNoteComposer';
 import { todayKey } from '../lib/date';
 import { ensureTodayGoals } from '../lib/carryForward';
 import type { DailyProgress, GoalItem } from '../types';
@@ -196,95 +194,80 @@ export function Dashboard() {
   const hasChecklist = groups.length > 0;
 
   return (
-    <div className="page page--dashboard">
+    <div className="page">
       {celebrating && <Confetti />}
       <h1>Dashboard</h1>
 
-      <div className="dashboard-grid">
-        <div className="dashboard-main">
-          <DailyNoteComposer />
+      {hasChecklist ? (
+        <>
+          <p className={dayComplete ? 'day-status day-status--complete celebration-banner' : 'day-status'}>
+            {dayComplete ? "You're done for today! 🎉" : 'Keep going.'}
+          </p>
+          {error && <p className="error">{error}</p>}
 
-          {hasChecklist ? (
-            <>
-              <p className={dayComplete ? 'day-status day-status--complete celebration-banner' : 'day-status'}>
-                {dayComplete ? "You're done for today! 🎉" : 'Keep going.'}
-              </p>
-              {error && <p className="error">{error}</p>}
-
-              {groups.map((group) => (
-                <div
-                  className={group.satisfied ? 'goal-group goal-group--done' : 'goal-group'}
-                  key={group.group_id}
-                >
-                  {group.items.map((item) => {
-                    const progress = progressByItemId.get(item.id);
-                    const saving = savingItemIds.has(item.id);
-                    return (
-                      <div className="goal-item" key={item.id}>
-                        {item.kind === 'boolean' ? (
-                          <label className="check-label">
-                            <input
-                              type="checkbox"
-                              checked={progress?.current_done ?? false}
-                              disabled={saving}
-                              onChange={() => toggleBoolean(item)}
-                            />
-                            <span className={progress?.current_done ? 'check-box check-box--checked' : 'check-box'}>
-                              {progress?.current_done ? '✓' : ''}
-                            </span>
-                            {item.label}
-                          </label>
-                        ) : (
-                          <div className="count-row">
-                            <span>
-                              {item.label}: {progress?.current_value ?? 0} / {item.target}
-                            </span>
-                            <button disabled={saving} onClick={() => incrementCount(item, 1)}>
-                              +1
-                            </button>
-                            <button disabled={saving} onClick={() => incrementCount(item, -1)}>
-                              -1
-                            </button>
-                            <div className="progress-bar">
-                              <div
-                                className={
-                                  (progress?.current_value ?? 0) >= (item.target ?? Infinity)
-                                    ? 'progress-bar-fill progress-bar-fill--done'
-                                    : 'progress-bar-fill'
-                                }
-                                style={{
-                                  width: `${Math.min(100, ((progress?.current_value ?? 0) / (item.target ?? 1)) * 100)}%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
+          {groups.map((group) => (
+            <div className={group.satisfied ? 'goal-group goal-group--done' : 'goal-group'} key={group.group_id}>
+              {group.items.map((item) => {
+                const progress = progressByItemId.get(item.id);
+                const saving = savingItemIds.has(item.id);
+                return (
+                  <div className="goal-item" key={item.id}>
+                    {item.kind === 'boolean' ? (
+                      <label className="check-label">
+                        <input
+                          type="checkbox"
+                          checked={progress?.current_done ?? false}
+                          disabled={saving}
+                          onChange={() => toggleBoolean(item)}
+                        />
+                        <span className={progress?.current_done ? 'check-box check-box--checked' : 'check-box'}>
+                          {progress?.current_done ? '✓' : ''}
+                        </span>
+                        {item.label}
+                      </label>
+                    ) : (
+                      <div className="count-row">
+                        <span>
+                          {item.label}: {progress?.current_value ?? 0} / {item.target}
+                        </span>
+                        <button disabled={saving} onClick={() => incrementCount(item, 1)}>
+                          +1
+                        </button>
+                        <button disabled={saving} onClick={() => incrementCount(item, -1)}>
+                          -1
+                        </button>
+                        <div className="progress-bar">
+                          <div
+                            className={
+                              (progress?.current_value ?? 0) >= (item.target ?? Infinity)
+                                ? 'progress-bar-fill progress-bar-fill--done'
+                                : 'progress-bar-fill'
+                            }
+                            style={{
+                              width: `${Math.min(100, ((progress?.current_value ?? 0) / (item.target ?? 1)) * 100)}%`,
+                            }}
+                          />
+                        </div>
                       </div>
-                    );
-                  })}
-                  {group.items.length > 1 && <p className="or-hint">(any one of these counts)</p>}
-                </div>
-              ))}
-            </>
-          ) : (
-            <div className="greeting-row">
-              <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} seed={profile?.id} />
-              <p className="hint">You haven't set up a daily checklist yet - add one below to get started.</p>
+                    )}
+                  </div>
+                );
+              })}
+              {group.items.length > 1 && <p className="or-hint">(any one of these counts)</p>}
             </div>
-          )}
-
-          <details className="manage-checklist" open={!hasChecklist}>
-            <summary>Manage today's checklist</summary>
-            <ManageChecklist onChange={load} />
-          </details>
+          ))}
+        </>
+      ) : (
+        <div className="greeting-row">
+          <Avatar name={profile?.display_name ?? '?'} avatarKey={profile?.avatar_key ?? null} seed={profile?.id} />
+          <p className="hint">You haven't set up a daily checklist yet - add one below to get started.</p>
         </div>
+      )}
 
-        <div className="dashboard-sidebar">
-          <h2>The group</h2>
-          <p className="hint">Everyone's daily status. No ranking, just visibility.</p>
-          <GroupFeed />
-        </div>
-      </div>
+      <details className="manage-checklist" open={!hasChecklist}>
+        <summary>Manage today's checklist</summary>
+        <ManageChecklist onChange={load} />
+      </details>
     </div>
   );
 }
